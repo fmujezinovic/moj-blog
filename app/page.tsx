@@ -1,103 +1,98 @@
 import Image from "next/image";
+import Link from "next/link";
 
-export default function Home() {
+export default function HomePage() {
   return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm/6 text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-[family-name:var(--font-geist-mono)] font-semibold">
-              app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
-
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+    <main className="flex flex-col bg-background text-foreground">
+      {/* Hero sekcija */}
+      <section className="h-screen flex flex-col md:flex-row items-center">
+        <div className="relative w-full md:w-1/2 h-80 md:h-full animate-fade-in md:animate-slide-in-left">
+          <Image
+            src="/hero.jpg"
+            alt="Hero image"
+            fill
+            className="object-cover object-left"
+            priority
+          />
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
-    </div>
+        <div className="w-full md:w-1/2 flex flex-col justify-center items-center text-center px-6 md:px-12 py-12 animate-fade-in md:animate-slide-in-right">
+          <h1 className="font-heading text-5xl md:text-6xl text-primary mb-6">
+            Dobrodošli na moj blog
+          </h1>
+          <p className="font-body text-lg md:text-xl text-muted-foreground mb-8 max-w-md">
+            Od medicine do programiranja — in vsega vmes, kar pritegne mojo radovednost.
+          </p>
+          <Link
+            href="/o-meni"
+            className="inline-block font-subheading text-lg px-6 py-3 rounded-md bg-primary text-primary-foreground hover:bg-primary/90 transition"
+          >
+            Več o meni
+          </Link>
+        </div>
+      </section>
+
+      {/* Sekcije s kategorijami */}
+      <section className="py-24 px-6 md:px-16 w-full flex flex-col gap-32">
+        {/* Porodništvo (slika desno) */}
+        <div className="flex flex-col md:flex-row-reverse items-center gap-16 animate-fade-in md:animate-slide-in-right">
+          <div className="relative w-full md:w-1/2 h-72 md:h-[480px]">
+            <Image
+              src="/images/porodnistvo.jpg"
+              alt="Porodništvo"
+              fill
+              className="object-cover rounded-xl"
+            />
+          </div>
+          <div className="w-full md:w-1/2">
+            <h2 className="font-heading text-4xl text-secondary mb-6">
+              Porodništvo 👶
+            </h2>
+            <p className="font-body text-lg text-muted-foreground leading-relaxed">
+              Izkušnje, znanje in nasveti s področja ginekologije in porodništva.
+            </p>
+          </div>
+        </div>
+
+        {/* Umetna inteligenca (slika levo) */}
+        <div className="flex flex-col md:flex-row items-center gap-16 animate-fade-in md:animate-slide-in-left">
+          <div className="relative w-full md:w-1/2 h-72 md:h-[480px]">
+            <Image
+              src="/images/predavanja.jpg"
+              alt="Umetna inteligenca"
+              fill
+              className="object-cover rounded-xl"
+            />
+          </div>
+          <div className="w-full md:w-1/2">
+            <h2 className="font-heading text-4xl text-secondary mb-6">
+              Umetna inteligenca 🤖
+            </h2>
+            <p className="font-body text-lg text-muted-foreground leading-relaxed">
+              Moji vpogledi v svet AI, raziskave in primeri uporabe v praksi.
+            </p>
+          </div>
+        </div>
+
+        {/* Programiranje (slika desno) */}
+        <div className="flex flex-col md:flex-row-reverse items-center gap-16 animate-fade-in md:animate-slide-in-right">
+          <div className="relative w-full md:w-1/2 h-72 md:h-[480px]">
+            <Image
+              src="/images/ultrazvok.jpg"
+              alt="Programiranje"
+              fill
+              className="object-cover rounded-xl"
+            />
+          </div>
+          <div className="w-full md:w-1/2">
+            <h2 className="font-heading text-4xl text-secondary mb-6">
+              Programiranje 💻
+            </h2>
+            <p className="font-body text-lg text-muted-foreground leading-relaxed">
+              Projekti, ideje in rešitve v svetu spletnega razvoja in programiranja.
+            </p>
+          </div>
+        </div>
+      </section>
+    </main>
   );
 }
