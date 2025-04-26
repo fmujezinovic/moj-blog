@@ -1,51 +1,55 @@
-import { supabase } from "@/lib/supabaseClient";
+import { loadContentList } from "@/lib/loadContent";
 import Link from "next/link";
 
-export default async function CategoryPage({ params }: { params: { category: string } }) {
-  // Pridobimo kategorijo po slug-u
-  const { data: category } = await supabase
-    .from("categories")
-    .select("id")
-    .eq("slug", params.category)
-    .single();
+export const dynamic = "force-dynamic"; // vedno server-side fetch za sveže podatke
 
-  // Če kategorije ni, prikaži napako
-  if (!category) {
-    return <div>Kategorija ni najdena.</div>;
+export default async function CategoryPage(props: { params: { category: string } }) {
+  const { category } = props.params;
+
+  const { data: posts } = await loadContentList({
+    table: "posts",
+    categorySlug: category,
+  });
+
+  if (!posts) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-screen text-center">
+        <h1 className="font-heading text-4xl text-primary mb-4">Kategorija ni najdena</h1>
+        <p className="font-body text-muted-foreground">Poskusite kasneje.</p>
+      </div>
+    );
   }
 
-  // Pridobimo objave iz te kategorije
-  const { data: posts } = await supabase
-    .from("posts")
-    .select("id, title, slug, published_at")
-    .eq("is_draft", false)
-    .eq("category_id", category.id)
-    .order("published_at", { ascending: false });
-
   return (
-    <div className="max-w-2xl mx-auto p-6 space-y-6">
-      <h1 className="font-heading text-h2 text-primary capitalize">
-        {params.category.replace(/-/g, " ")}
+    <main className="max-w-6xl mx-auto p-6 space-y-8 bg-background text-foreground">
+      <h1 className="font-heading text-h1 text-primary text-center capitalize">
+        {category.replace(/-/g, " ")}
       </h1>
 
-      {posts?.length === 0 && (
-        <p className="font-body text-base text-muted-foreground">
-          Ni objav v tej kategoriji.
+      {posts.length === 0 ? (
+        <p className="font-body text-base text-muted-foreground text-center">
+          Trenutno ni objav v tej kategoriji.
         </p>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {posts.map((post) => (
+            <Link
+              key={post.id}
+              href={`/${category}/${post.slug}`}
+              className="group"
+            >
+              <article className="p-6 rounded-lg border shadow-sm hover:shadow-md transition flex flex-col h-full">
+                <h2 className="font-subheading text-xl text-foreground group-hover:text-primary mb-2">
+                  {post.title}
+                </h2>
+                <p className="font-body text-sm text-muted-foreground">
+                  {post.published_at ? new Date(post.published_at).toLocaleDateString("sl-SI") : "Datum neznan"}
+                </p>
+              </article>
+            </Link>
+          ))}
+        </div>
       )}
-
-      {posts?.map((post) => (
-        <Link key={post.id} href={`/${params.category}/${post.slug}`}>
-          <article className="p-4 border rounded-md hover:bg-muted transition">
-            <h2 className="font-subheading text-h3 text-foreground">
-              {post.title}
-            </h2>
-            <p className="font-body text-small text-muted-foreground">
-              {new Date(post.published_at).toLocaleDateString()}
-            </p>
-          </article>
-        </Link>
-      ))}
-    </div>
+    </main>
   );
 }

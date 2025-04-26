@@ -1,14 +1,11 @@
 import { loadContent } from "@/lib/loadContent";
-import RenderedMDX from "@/components/RenderedMDX";
+import FancyPostLayout from "@/components/FancyPostLayout";
+import { Suspense } from "react";
 import { Metadata } from "next";
 
-export const dynamic = "force-dynamic"; // Da vedno server-side fetch-a (če se v Supabase kaj spremeni)
+export const dynamic = "force-dynamic";
 
-export async function generateMetadata({
-  params,
-}: {
-  params: { category: string; slug: string };
-}): Promise<Metadata> {
+export async function generateMetadata({ params }: { params: { category: string; slug: string } }): Promise<Metadata> {
   const { data: post } = await loadContent({
     table: "posts",
     slug: params.slug,
@@ -21,23 +18,27 @@ export async function generateMetadata({
   };
 }
 
-export default async function PostPage({
-  params,
-}: {
-  params: { category: string; slug: string };
-}) {
-  const { MDXContent, data: post } = await loadContent({
+export default async function PostPage({ params }: { params: { category: string; slug: string } }) {
+  const { data: post, MDXContent } = await loadContent({
     table: "posts",
     slug: params.slug,
     categorySlug: params.category,
   });
 
   return (
-    <div className="max-w-3xl mx-auto px-6 py-12 flex flex-col space-y-6 bg-background text-foreground">
-      <h1 className="font-heading text-h1 text-primary">{post.title}</h1>
-      <RenderedMDX>
-        <MDXContent />
-      </RenderedMDX>
-    </div>
+    <main className="flex flex-col bg-background text-foreground">
+      <Suspense fallback={<div className="text-center py-20 font-subheading text-base">Nalagam objavo...</div>}>
+        <FancyPostLayout
+          title={post.title}
+          content={<MDXContent />}
+          images={[
+            "https://images.unsplash.com/photo-1498050108023-c5249f4df085",
+            "https://images.unsplash.com/photo-1504384308090-c894fdcc538d",
+            "https://images.unsplash.com/photo-1492724441997-5dc865305da7",
+            "https://images.unsplash.com/photo-1498050108023-c5249f4df085",
+          ]}
+        />
+      </Suspense>
+    </main>
   );
 }

@@ -2,6 +2,7 @@ import { supabase } from "@/lib/supabaseClient";
 import { parseMDX } from "@/lib/parse-mdx";
 import { notFound } from "next/navigation";
 
+// ==================== OSTAJA TVOJA FUNKCIJA ====================
 export async function loadContent({
   table,
   slug,
@@ -9,7 +10,7 @@ export async function loadContent({
 }: {
   table: "pages" | "posts";
   slug: string;
-  categorySlug?: string; // samo za posts
+  categorySlug?: string;
 }) {
   if (table === "posts" && categorySlug) {
     const { data: cat, error: catError } = await supabase
@@ -34,7 +35,10 @@ export async function loadContent({
       notFound();
     }
 
-    const MDXContent = await parseMDX(post.content_md);
+      const MDXContent = await parseMDX(post.content_md);
+      console.log("POST: ", post);
+console.log("POST CONTENT_MD:", post?.content_md);
+
 
     return { data: post, MDXContent };
   }
@@ -54,4 +58,40 @@ export async function loadContent({
   const MDXContent = await parseMDX(page.content_md);
 
   return { data: page, MDXContent };
+}
+
+// ==================== NOVO: ZA SEZNAM OBJAV ====================
+export async function loadContentList({
+  table,
+  categorySlug,
+}: {
+  table: "posts";
+  categorySlug: string;
+}) {
+  if (table === "posts" && categorySlug) {
+    const { data: cat, error: catError } = await supabase
+      .from("categories")
+      .select("id")
+      .eq("slug", categorySlug)
+      .single();
+
+    if (catError || !cat) {
+      notFound();
+    }
+
+    const { data: posts, error: postsError } = await supabase
+      .from("posts")
+      .select("id, title, slug, published_at")
+      .eq("category_id", cat.id)
+      .eq("is_draft", false)
+      .order("published_at", { ascending: false });
+
+    if (postsError || !posts) {
+      notFound();
+    }
+
+    return { data: posts };
+  }
+
+  return { data: [] };
 }
