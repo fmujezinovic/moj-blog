@@ -90,3 +90,6 @@ async function fetchPexelsImages(query: string): Promise<string[]> {
   const data = await res.json();
   return (data.photos || []).map((item: any) => item.src.medium);
 }
+
+
+
