@@ -1,9 +1,12 @@
 // app/page.tsx
-import { supabase } from "@/lib/supabaseClient";
+import { createClient } from "@/utils/supabase/client"
 import Link from "next/link";
 import Image from "next/image";
 
+
+
 export default async function HomePage() {
+  const supabase = createClient();
   const { data: categories } = await supabase
     .from("categories")
     .select("*")

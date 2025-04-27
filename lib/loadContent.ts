@@ -1,4 +1,4 @@
-import { supabase } from "@/lib/supabaseClient";
+import { createClient } from "@/utils/supabase/client";
 import { parseMDX } from "@/lib/parse-mdx";
 import { notFound } from "next/navigation";
 
@@ -12,6 +12,8 @@ export async function loadContent({
   slug: string;
   categorySlug?: string;
 }) {
+  const supabase = createClient();
+
   if (table === "posts" && categorySlug) {
     const { data: cat, error: catError } = await supabase
       .from("categories")
@@ -20,6 +22,7 @@ export async function loadContent({
       .single();
 
     if (catError || !cat) {
+      console.error(catError);
       notFound();
     }
 
@@ -32,13 +35,13 @@ export async function loadContent({
       .single();
 
     if (postError || !post) {
+      console.error(postError);
       notFound();
     }
 
-      const MDXContent = await parseMDX(post.content_md);
-      console.log("POST: ", post);
-console.log("POST CONTENT_MD:", post?.content_md);
-
+    const MDXContent = await parseMDX(post.content_md);
+    console.log("POST: ", post);
+    console.log("POST CONTENT_MD:", post?.content_md);
 
     return { data: post, MDXContent };
   }
@@ -52,6 +55,7 @@ console.log("POST CONTENT_MD:", post?.content_md);
     .single();
 
   if (pageError || !page) {
+    console.error(pageError);
     notFound();
   }
 
@@ -68,6 +72,8 @@ export async function loadContentList({
   table: "posts";
   categorySlug: string;
 }) {
+  const supabase = createClient();
+
   if (table === "posts" && categorySlug) {
     const { data: cat, error: catError } = await supabase
       .from("categories")
@@ -76,6 +82,7 @@ export async function loadContentList({
       .single();
 
     if (catError || !cat) {
+      console.error(catError);
       notFound();
     }
 
@@ -87,6 +94,7 @@ export async function loadContentList({
       .order("published_at", { ascending: false });
 
     if (postsError || !posts) {
+      console.error(postsError);
       notFound();
     }
 

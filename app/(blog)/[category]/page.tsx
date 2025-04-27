@@ -3,8 +3,9 @@ import Link from "next/link";
 
 export const dynamic = "force-dynamic"; // vedno server-side fetch za sveže podatke
 
-export default async function CategoryPage(props: { params: { category: string } }) {
-  const { category } = props.params;
+export default async function CategoryPage({ params }: { params: { category: string } }) {
+  const category = params.category;
+
 
   const { data: posts } = await loadContentList({
     table: "posts",
