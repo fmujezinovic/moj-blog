@@ -5,7 +5,6 @@ import { v4 as uuidv4 } from "uuid";
 
 export async function uploadImage(file: File) {
   const supabase = createClient();
-  
   const fileExt = file.name.split('.').pop();
   const fileName = `${uuidv4()}.${fileExt}`;
   const filePath = `${fileName}`;
@@ -23,10 +22,15 @@ export async function uploadImage(file: File) {
     throw new Error('Napaka pri nalaganju slike.');
   }
 
-  const { data: publicUrlData } = supabase
+  const { data: publicUrlData, error: urlError } = supabase
     .storage
     .from('images')
     .getPublicUrl(filePath);
+
+  if (urlError) {
+    console.error(urlError);
+    throw new Error('Napaka pri pridobivanju URL slike.');
+  }
 
   return publicUrlData?.publicUrl;
 }

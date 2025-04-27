@@ -1,5 +1,6 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import {
   useReactTable,
@@ -49,7 +50,8 @@ interface TablePostsProps {
 }
 
 export default function TablePosts({ data }: TablePostsProps) {
-  const supabase = createClient();
+    const supabase = createClient();
+    const router = useRouter();
 
   const [search, setSearch] = useState("");
   const [posts, setPosts] = useState<Post[]>(data);
@@ -142,13 +144,13 @@ export default function TablePosts({ data }: TablePostsProps) {
         return (
           <>
             <div className="flex gap-2">
-              <Button
-                size="icon"
-                variant="outline"
-                onClick={() => handleEdit(post)}
-              >
-                <Pencil className="h-4 w-4" />
-              </Button>
+             <Button
+  size="icon"
+  variant="outline"
+  onClick={() => router.push(`/dashboard/posts/${post.slug}/edit`)}
+>
+  <Pencil className="h-4 w-4" />
+</Button>
               <Button
                 size="icon"
                         variant="ghost"

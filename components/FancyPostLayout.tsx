@@ -1,7 +1,7 @@
-'use client';
+"use client";
 
-import { ReactNode, Children, isValidElement, cloneElement } from 'react';
-import { motion } from 'framer-motion';
+import { ReactNode, Children, isValidElement, cloneElement } from "react";
+import { motion } from "framer-motion";
 
 interface FancyPostLayoutProps {
   title: string;
@@ -11,7 +11,7 @@ interface FancyPostLayoutProps {
 
 const fadeInUp = {
   hidden: { opacity: 0, y: 40 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.8, ease: 'easeOut' } },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.8, ease: "easeOut" } },
 };
 
 export default function FancyPostLayout({ title, content, images = [] }: FancyPostLayoutProps) {
@@ -21,7 +21,7 @@ export default function FancyPostLayout({ title, content, images = [] }: FancyPo
   let currentSection: { heading: ReactNode | null; body: ReactNode[] } = { heading: null, body: [] };
 
   elements.forEach((el) => {
-    if (isValidElement(el) && el.type === 'h2') {
+    if (isValidElement(el) && el.type === "h2") {
       if (currentSection.heading) {
         sections.push(currentSection as { heading: ReactNode; body: ReactNode[] });
       }
@@ -37,13 +37,30 @@ export default function FancyPostLayout({ title, content, images = [] }: FancyPo
 
   return (
     <div className="flex flex-col gap-20 max-w-4xl mx-auto px-6 py-12">
-      {/* Glavni naslov iz props */}
+      {/* Cover Image */}
+      {images[0] && (
+        <motion.div
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true }}
+          variants={fadeInUp}
+          className="w-full h-64 md:h-96 mb-8"
+        >
+          <img
+            src={images[0]}
+            alt="Naslovna slika"
+            className="w-full h-full object-cover rounded-lg shadow-md"
+          />
+        </motion.div>
+      )}
+
+      {/* Glavni naslov */}
       <motion.h1
         initial="hidden"
         whileInView="visible"
         viewport={{ once: true }}
         variants={fadeInUp}
-        className="font-heading text-h1 text-primary text-center mb-8"
+        className="font-heading text-h1 text-primary text-center mb-12"
       >
         {title}
       </motion.h1>
@@ -63,18 +80,19 @@ export default function FancyPostLayout({ title, content, images = [] }: FancyPo
               transition: {
                 duration: 0.8,
                 delay: index * 0.2,
-                ease: 'easeOut',
+                ease: "easeOut",
               },
             },
           }}
           className={`flex flex-col md:flex-row items-center gap-12 ${
-            index % 2 === 0 ? '' : 'md:flex-row-reverse'
+            index % 2 === 0 ? "" : "md:flex-row-reverse"
           }`}
         >
-          {images.length > 0 && (
+          {/* Sekcijska slika (če obstaja) */}
+          {images[index + 1] && (
             <div className="relative w-full md:w-1/2 h-64 md:h-96">
               <img
-                src={images[index % images.length]}
+                src={images[index + 1]}
                 alt={`Slika sekcije ${index + 1}`}
                 className="object-cover rounded-lg shadow-md w-full h-full"
               />
@@ -82,7 +100,7 @@ export default function FancyPostLayout({ title, content, images = [] }: FancyPo
           )}
           <div className="w-full md:w-1/2">
             {cloneElement(section.heading as React.ReactElement, {
-              className: 'font-subheading text-h2 text-secondary mb-4',
+              className: "font-subheading text-h2 text-secondary mb-4",
             })}
             <div className="space-y-4 text-base font-body text-foreground text-justify">
               {section.body}

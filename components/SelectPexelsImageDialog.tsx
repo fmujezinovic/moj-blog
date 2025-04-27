@@ -21,7 +21,7 @@ export function SelectPexelsImageDialog({ onSelect }: SelectImageDialogProps) {
     try {
       const res = await fetch(`/api/pexels?query=${encodeURIComponent(searchQuery)}`);
       const data = await res.json();
-      setImages(data.results || []);
+      setImages(data.photos || []);
     } catch (error) {
       console.error("Napaka pri iskanju Pexels slik:", error);
     } finally {

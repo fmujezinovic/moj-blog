@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, FileText, FilePlus, Folder } from "lucide-react";
+import { LayoutDashboard, FileText, FilePlus, Folder, PlusCircle } from "lucide-react"; // ➕ Dodal PlusCircle ikono
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
@@ -43,6 +43,21 @@ const Sidebar = () => {
         <Link href="/dashboard/posts">
           <FileText className="h-5 w-5" />
           Posts
+        </Link>
+      </Button>
+
+      {/* ➕ Create New Post */}
+      <Button
+        asChild
+        variant="ghost"
+        className={cn(
+          "w-full justify-start gap-2",
+          isActive("/dashboard/posts/create") && activeClass
+        )}
+      >
+        <Link href="/dashboard/posts/create">
+          <PlusCircle className="h-5 w-5" />
+          Create Post
         </Link>
       </Button>
 
