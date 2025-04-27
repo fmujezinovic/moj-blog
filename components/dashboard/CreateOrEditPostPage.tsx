@@ -6,13 +6,14 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
 import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Switch } from "@/components/ui/switch";
 import { createClient } from "@/utils/supabase/client";
 import UploadImageButton from "@/components/UploadImageButton";
+import { SelectUnsplashImageDialog } from "@/components/SelectUnsplashImageDialog";
+import { SelectPexelsImageDialog } from "@/components/SelectPexelsImageDialog";
 import { toast } from "sonner";
 import { useRouter, useParams } from "next/navigation";
 import { motion } from "framer-motion";
@@ -26,9 +27,7 @@ export default function CreateOrEditPostPage() {
 
   const [title, setTitle] = useState("");
   const [published, setPublished] = useState(false);
-  const [sections, setSections] = useState([
-    { heading: "", content: "" }
-  ]);
+  const [sections, setSections] = useState([{ heading: "", content: "", imageUrl: "" }]);
   const [selectedTab, setSelectedTab] = useState("0");
   const [categories, setCategories] = useState<{ id: string; name: string }[]>([]);
   const [categoryId, setCategoryId] = useState<string>("");
@@ -79,14 +78,14 @@ export default function CreateOrEditPostPage() {
         const lines = block.split("\n\n");
         const heading = index === 0 ? lines[0].replace("## ", "") : lines[0];
         const content = lines.slice(1).join("\n\n");
-        return { heading, content };
+        return { heading, content, imageUrl: "" };
       });
 
     setSections(parsedSections);
   };
 
   const handleAddSection = () => {
-    setSections((prev) => [...prev, { heading: "", content: "" }]);
+    setSections((prev) => [...prev, { heading: "", content: "", imageUrl: "" }]);
     setSelectedTab((sections.length).toString());
   };
 
@@ -94,6 +93,14 @@ export default function CreateOrEditPostPage() {
     setSections((prev) => {
       const updated = [...prev];
       updated[index][field] = value;
+      return updated;
+    });
+  };
+
+  const handleSectionImageUpload = (index: number, url: string) => {
+    setSections((prev) => {
+      const updated = [...prev];
+      updated[index].imageUrl = url;
       return updated;
     });
   };
@@ -207,7 +214,7 @@ export default function CreateOrEditPostPage() {
             </div>
           </div>
 
-          <div className="flex flex-col gap-2">
+          <div className="flex flex-col gap-2 mt-6">
             <Label className="text-md font-semibold">Naslovna slika</Label>
             <UploadImageButton
               currentUploadedPath={null}
@@ -259,6 +266,7 @@ export default function CreateOrEditPostPage() {
               >
                 <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.4 }}>
                   <div className="flex flex-col gap-6">
+
                     <div>
                       <Label className="text-md font-semibold">Podnaslov</Label>
                       <Input
@@ -276,20 +284,44 @@ export default function CreateOrEditPostPage() {
                         value={section.content}
                         onChange={(e) => handleSectionChange(index, "content", e.target.value)}
                       />
-                      <div className="flex justify-end gap-2">
-                        <SectionRegenerator
-                          sectionTitle={section.heading}
-                          onRegenerate={(newContent) => handleSectionChange(index, "content", newContent)}
+                    </div>
+
+                    <div className="flex flex-col gap-4">
+                      <Label className="text-md font-semibold">Slika sekcije</Label>
+                      <UploadImageButton
+                        currentUploadedPath={null}
+                        onUploaded={(url) => handleSectionImageUpload(index, url)}
+                      />
+                      <div className="flex gap-4">
+                        <SelectUnsplashImageDialog
+                          onSelect={(url) => handleSectionImageUpload(index, url)}
                         />
+                        <SelectPexelsImageDialog
+                          onSelect={(url) => handleSectionImageUpload(index, url)}
+                        />
+                      </div>
+                    </div>
+
+                    <div className="flex justify-end gap-4">
+                      <SectionRegenerator
+                        sectionTitle={section.heading}
+                        onRegenerate={(newContent) => handleSectionChange(index, "content", newContent)}
+                      />
+                      {sections.length > 1 && (
                         <Button
                           type="button"
                           variant="destructive"
                           size="sm"
-                          onClick={() => handleDeleteSection(index)}
+                          className="bg-destructive text-black hover:bg-destructive/80"
+                          onClick={() => {
+                            if (confirm("Ali si prepričan, da želiš izbrisati to sekcijo?")) {
+                              handleDeleteSection(index);
+                            }
+                          }}
                         >
                           Izbriši sekcijo
                         </Button>
-                      </div>
+                      )}
                     </div>
 
                   </div>
