@@ -9,7 +9,8 @@ import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import SectionRegenerator from "@/components/dashboard/SectionRegenerator";
 import UploadImageButton from "@/components/UploadImageButton";
-import { SelectImageDialog } from "@/components/SelectImageDialog";
+import { SelectUnsplashImageDialog } from "@/components/SelectUnsplashImageDialog";
+import { SelectPexelsImageDialog } from "@/components/SelectPexelsImageDialog";
 import { createClient } from "@/utils/supabase/client";
 import { toast } from "sonner";
 
@@ -114,12 +115,18 @@ export default function CreatePostPage() {
 
               <div className="space-y-2">
                 <Label>Slika za sekciju</Label>
+
                 <UploadImageButton onUpload={(url) => handleSectionImageChange(index, url)} />
-                <SelectImageDialog onSelect={(url) => handleSectionImageChange(index, url)} />
+
+                <div className="flex gap-2 mt-2">
+                  <SelectUnsplashImageDialog onSelect={(url) => handleSectionImageChange(index, url)} />
+                  <SelectPexelsImageDialog onSelect={(url) => handleSectionImageChange(index, url)} />
+                </div>
+
                 {section.imageUrl && (
                   <img
                     src={section.imageUrl}
-                    alt="Predogled"
+                    alt="Predogled slike"
                     className="w-32 h-32 object-cover rounded-md mt-2"
                   />
                 )}
@@ -133,7 +140,9 @@ export default function CreatePostPage() {
             <Button type="button" variant="outline" onClick={handleAddSection}>
               Dodaj Podnaslov
             </Button>
-            <Button onClick={handleSave}>Spremi Post</Button>
+            <Button onClick={handleSave}>
+              Spremi Post
+            </Button>
           </div>
         </CardContent>
       </Card>

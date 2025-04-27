@@ -9,24 +9,21 @@ interface SelectImageDialogProps {
   onSelect: (url: string) => void;
 }
 
-export function SelectImageDialog({ onSelect }: SelectImageDialogProps) {
+export function SelectPexelsImageDialog({ onSelect }: SelectImageDialogProps) {
   const [open, setOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [images, setImages] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
 
   const handleSearch = async () => {
+    if (!searchQuery.trim()) return;
     setLoading(true);
     try {
-      // Išči Unsplash + Pexels
-      const [unsplashImages, pexelsImages] = await Promise.all([
-        fetchUnsplashImages(searchQuery),
-        fetchPexelsImages(searchQuery),
-      ]);
-
-      setImages([...unsplashImages, ...pexelsImages]);
+      const res = await fetch(`/api/pexels?query=${encodeURIComponent(searchQuery)}`);
+      const data = await res.json();
+      setImages(data.results || []);
     } catch (error) {
-      console.error("Napaka pri iskanju slik:", error);
+      console.error("Napaka pri iskanju Pexels slik:", error);
     } finally {
       setLoading(false);
     }
@@ -40,12 +37,14 @@ export function SelectImageDialog({ onSelect }: SelectImageDialogProps) {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant="outline" size="sm">Izberi iz Unsplash/Pexels</Button>
+        <Button variant="outline" size="sm">
+          Izberi iz Pexels
+        </Button>
       </DialogTrigger>
 
-      <DialogContent className="max-w-3xl">
+      <DialogContent className="max-w-5xl">
         <DialogHeader>
-          <DialogTitle>Izberi sliko</DialogTitle>
+          <DialogTitle>Izberi sliko iz Pexels</DialogTitle>
         </DialogHeader>
 
         <div className="flex gap-2">
@@ -53,20 +52,26 @@ export function SelectImageDialog({ onSelect }: SelectImageDialogProps) {
             placeholder="Iskanje slik (npr. AI, narava, mesto...)"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                e.preventDefault();
+                handleSearch();
+              }
+            }}
           />
           <Button onClick={handleSearch} disabled={loading}>
             {loading ? "Iščem..." : "Išči"}
           </Button>
         </div>
 
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-4 max-h-[400px] overflow-y-auto mt-4">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 max-h-[400px] overflow-y-auto mt-4">
           {images.map((url) => (
             <img
               key={url}
               src={url}
-              alt="Izbrana slika"
+              alt="Pexels slika"
               onClick={() => handleSelect(url)}
-              className="rounded-lg cursor-pointer hover:opacity-75 transition"
+              className="rounded-lg cursor-pointer hover:scale-105 transition-transform duration-300"
             />
           ))}
         </div>
@@ -74,22 +79,3 @@ export function SelectImageDialog({ onSelect }: SelectImageDialogProps) {
     </Dialog>
   );
 }
-
-async function fetchUnsplashImages(query: string): Promise<string[]> {
-  const res = await fetch(`https://api.unsplash.com/search/photos?query=${query}&client_id=${process.env.NEXT_PUBLIC_UNSPLASH_ACCESS_KEY}`);
-  const data = await res.json();
-  return (data.results || []).map((item: any) => item.urls.small);
-}
-
-async function fetchPexelsImages(query: string): Promise<string[]> {
-  const res = await fetch(`https://api.pexels.com/v1/search?query=${query}&per_page=10`, {
-    headers: {
-      Authorization: process.env.NEXT_PUBLIC_PEXELS_API_KEY!,
-    },
-  });
-  const data = await res.json();
-  return (data.photos || []).map((item: any) => item.src.medium);
-}
-
-
-
