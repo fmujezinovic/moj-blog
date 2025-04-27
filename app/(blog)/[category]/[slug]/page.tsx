@@ -26,12 +26,12 @@ export default async function PostPage({ params }: { params: { category: string;
   });
 
   return (
-    <main className="flex flex-col bg-background text-foreground">
+    <main className="flex flex-col bg-background text-foreground min-h-screen">
       <Suspense fallback={<div className="text-center py-20 font-subheading text-base">Nalagam objavo...</div>}>
         <FancyPostLayout
           title={post.title}
           content={<MDXContent />}
-          images={post.images || []}   {/* ✅ Prava rešitev */}
+          images={post.images || []}
         />
       </Suspense>
     </main>

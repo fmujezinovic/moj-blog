@@ -2,7 +2,7 @@ import { createClient } from "@/utils/supabase/client";
 import { parseMDX } from "@/lib/parse-mdx";
 import { notFound } from "next/navigation";
 
-// ==================== OSTAJA TVOJA FUNKCIJA ====================
+// ==================== LOAD ENO OBJAVO ====================
 export async function loadContent({
   table,
   slug,
@@ -40,13 +40,17 @@ export async function loadContent({
     }
 
     const MDXContent = await parseMDX(post.content_md);
-    console.log("POST: ", post);
-    console.log("POST CONTENT_MD:", post?.content_md);
 
-    return { data: post, MDXContent };
+    return {
+      data: {
+        ...post,
+        images: Array.isArray(post.images) ? post.images : [], // 🔥 vedno array, tudi če manjka
+      },
+      MDXContent,
+    };
   }
 
-  // Če ni post, ampak stran (page)
+  // ==================== Če je stran (page) ====================
   const { data: page, error: pageError } = await supabase
     .from("pages")
     .select("*")
@@ -61,10 +65,16 @@ export async function loadContent({
 
   const MDXContent = await parseMDX(page.content_md);
 
-  return { data: page, MDXContent };
+  return {
+    data: {
+      ...page,
+      images: [], // 🔥 pages nimajo images => prazen array
+    },
+    MDXContent,
+  };
 }
 
-// ==================== NOVO: ZA SEZNAM OBJAV ====================
+// ==================== ZA SEZNAM OBJAV ====================
 export async function loadContentList({
   table,
   categorySlug,
