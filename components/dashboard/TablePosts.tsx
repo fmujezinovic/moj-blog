@@ -38,6 +38,8 @@ type Post = {
 };
 
 export default function TablePosts({ data }: { data: Post[] }) {
+  console.log("Prejeti podatki iz Supabase:", data);
+
   const supabase = createClient();
   const router = useRouter();
 
@@ -45,7 +47,7 @@ export default function TablePosts({ data }: { data: Post[] }) {
   const [posts, setPosts] = useState<Post[]>(() =>
     data.map(post => ({
       ...post,
-      is_draft: post.is_draft === null ? true : post.is_draft ?? false,
+      is_draft: post.is_draft === null ? true : post.is_draft === true,
     }))
   );
   const [openDialog, setOpenDialog] = useState(false);

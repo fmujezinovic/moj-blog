@@ -9,15 +9,16 @@ export default async function PostsPage() {
 
   /* —— dohvat + JOIN kategorije (slug) —— */
   const { data: posts, error } = await supabase
-    .from("posts")
-    .select(`
-      id,
-      title,
-      slug,
-      published_at,
-      categories ( slug )
-    `)
-    .order("published_at", { ascending: false });
+  .from("posts")
+  .select(`
+    id,
+    title,
+    slug,
+    published_at,
+    is_draft,
+    categories ( slug )
+  `)
+  .order("published_at", { ascending: false });
 
   if (error) {
     console.error("Napaka pri pridobivanju objav:", error.message);
