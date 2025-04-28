@@ -13,17 +13,17 @@
   --font-subheading: 'Inter', sans-serif;
 
   --background: 330 100% 95%;
-  /* svetla roza (#FFEAF9) */
-  --foreground: 240 10% 3.9%;
 
-  --primary: 288 30% 55%;
-  /* vijolična (#9C69B5) */
+  --foreground: 292 91% 16%;
+
+  --primary: 277 66% 39%;
+
   --primary-foreground: 0 0% 100%;
 
-  --heading: 0 0% 20%;
-  /* temno siva (#333333) */
-  --subheading: 240 3.8% 46.1%;
-  /* svetlo siva (#A1A1AA) */
+  --heading: 290 90% 15%;
+
+  --subheading: 290 90% 15%;
+
   --muted: 240 4.8% 95.9%;
   --muted-foreground: 240 3.8% 46.1%;
 
@@ -46,18 +46,18 @@ body {
 /* -------------------------------------------------------- */
 @layer base {
 
-h1 {
-    @apply text-5xl sm:text-6xl font-bold mb-8;
-  }
-
- h2 {
-   @apply text-3xl sm:text-4xl font-heading text-heading mb-6;
- }
-
-  h3 {
-    @apply text-2xl sm:text-4xl font-semibold mb-4;
-  }
-
+  h1 {
+      @apply font-heading text-5xl md:text-6xl text-heading tracking-tight mb-6;
+    }
+  
+    h2 {
+      @apply font-heading text-4xl md:text-5xl text-heading tracking-normal mb-5;
+    }
+  
+    h3 {
+      @apply font-heading text-3xl md:text-4xl text-heading tracking-normal mb-4;
+    }
+  
   p {
     @apply text-base sm:text-lg leading-relaxed mb-4;
   }
