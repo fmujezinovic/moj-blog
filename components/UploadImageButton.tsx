@@ -1,5 +1,7 @@
 "use client";
 
+import type { ImageRef } from "@/types/image";
+
 import { useRef, useState } from "react";
 import { toast } from "sonner";
 import { createClient } from "@/utils/supabase/client";
@@ -7,7 +9,7 @@ import { v4 as uuidv4 } from "uuid";
 
 interface UploadImageButtonProps {
   currentUploadedPath: string | null;
-  onUploaded: (url: string, path: string | null) => void;
+  onUploaded: (ref: ImageRef) => void;   // sada prima objekt
 }
 
 export default function UploadImageButton({ currentUploadedPath, onUploaded }: UploadImageButtonProps) {
@@ -83,7 +85,8 @@ export default function UploadImageButton({ currentUploadedPath, onUploaded }: U
 
       setUploadedUrl(publicUrlData.publicUrl);
 
-      onUploaded(publicUrlData.publicUrl, filePath);
+      onUploaded({ url: publicUrlData.publicUrl, path: filePath });
+
 
       toast.success("Slika uspešno naložena!");
     } catch (error) {
@@ -106,7 +109,8 @@ export default function UploadImageButton({ currentUploadedPath, onUploaded }: U
       await new Promise((resolve) => setTimeout(resolve, 2000));
     }
     setUploadedUrl(null);
-    onUploaded("", null);
+    onUploaded({ url: "", path: null });
+
     toast.success("Slika uspešno odstranjena!");
   };
 

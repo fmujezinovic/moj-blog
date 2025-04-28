@@ -147,7 +147,7 @@ export default function TablePosts({ data }: TablePostsProps) {
              <Button
   size="icon"
   variant="outline"
-  onClick={() => router.push(`/dashboard/posts/${post.slug}/edit`)}
+  onClick={() => router.push(`/dashboard/posts/${post.slug}`)}
 >
   <Pencil className="h-4 w-4" />
 </Button>
