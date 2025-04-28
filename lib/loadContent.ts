@@ -118,7 +118,7 @@ export async function loadContentList({
 
     const { data: posts, error: postsErr } = await supabase
       .from("posts")
-      .select("id, title, slug, published_at")
+      .select("id, title, slug, published_at, images") // ✅ DODALI "images"
       .eq("category_id", cat.id)
       .eq("is_draft", false)
       .order("published_at", { ascending: false });
