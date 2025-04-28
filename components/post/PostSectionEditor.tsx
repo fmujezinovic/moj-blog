@@ -9,7 +9,7 @@ import { Button }   from "@/components/ui/button";
 import UploadImageButton from "@/components/UploadImageButton";
 import { SelectUnsplashImageDialog } from "@/components/SelectUnsplashImageDialog";
 import { SelectPexelsImageDialog }   from "@/components/SelectPexelsImageDialog";
-import SectionRegenerator           from "@/components/dashboard/SectionRegenerator";
+import SectionRegenerator            from "@/components/dashboard/SectionRegenerator";
 
 interface Props {
   idx: number;
@@ -26,14 +26,17 @@ export default function PostSectionEditor({
   onImage,
   onDelete,
 }: Props) {
+  const wrap = (u: string | ImageRef): ImageRef =>
+    typeof u === "string" ? { url: u, path: null } : u;
+
   return (
     <div className="space-y-6 bg-muted/50 p-6 rounded-md shadow-sm">
       {/* HEADING */}
       <div>
         <Label className="text-md font-semibold">Podnaslov</Label>
         <Input
-          placeholder="Unesi podnaslov"
           value={section.heading}
+          placeholder="Unesi podnaslov"
           onChange={e => onChange(idx, "heading", e.target.value)}
         />
       </div>
@@ -42,9 +45,9 @@ export default function PostSectionEditor({
       <div className="flex flex-col gap-2">
         <Label className="text-md font-semibold">Vsebina</Label>
         <Textarea
-          placeholder="Unesi vsebinu sekcije"
           rows={8}
           value={section.content}
+          placeholder="Unesi vsebinu sekcije"
           onChange={e => onChange(idx, "content", e.target.value)}
         />
       </div>
@@ -56,20 +59,13 @@ export default function PostSectionEditor({
         <UploadImageButton
           currentUploadedPath={section.uploadedImagePath}
           onUploaded={ref => onImage(idx, ref)}
+          externalUrl={section.imageUrl}
         />
 
         <div className="flex gap-4">
-          <SelectUnsplashImageDialog onSelect={ref => onImage(idx, ref)} />
-          <SelectPexelsImageDialog  onSelect={ref => onImage(idx, ref)} />
+          <SelectUnsplashImageDialog onSelect={u => onImage(idx, wrap(u))} />
+          <SelectPexelsImageDialog  onSelect={u => onImage(idx, wrap(u))} />
         </div>
-
-        {section.imageUrl && (
-          <img
-            src={section.imageUrl}
-            alt={`Sekcija ${idx + 1}`}
-            className="mt-4 rounded-md max-h-48 object-cover"
-          />
-        )}
       </div>
 
       {/* ACTIONS */}
