@@ -44,17 +44,14 @@ export default function SectionRegenerator({ sectionTitle, onRegenerate }: Secti
   };
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog open={open} onOpenChange={setOpen} >
       <DialogTrigger asChild>
         <Button variant="outline" size="sm">
           Regeneriraj
         </Button>
       </DialogTrigger>
 
-          <DialogContent
-              
-
-          >
+          <DialogContent className="font-sans">
         <DialogHeader>
           <DialogTitle>Regeneriraj sekciju</DialogTitle>
         </DialogHeader>
