@@ -1,8 +1,18 @@
 import { createClient } from "@/utils/supabase/client";
-import { parseMDX } from "@/lib/parse-mdx";
-import { notFound } from "next/navigation";
+import { parseMDX }     from "@/lib/parse-mdx";
+import { notFound }     from "next/navigation";
 
-// ==================== LOAD ENO OBJAVO ====================
+/* ------------------------------------------------------------------ */
+/*                              1. HELPERS                            */
+/* ------------------------------------------------------------------ */
+const toUrlArray = (raw: any): string[] =>
+  Array.isArray(raw)
+    ? raw.map((item: any) => (typeof item === "string" ? item : item.url))
+    : [];
+
+/* ------------------------------------------------------------------ */
+/*                       LOAD ENO OBJAVO (page / post)                */
+/* ------------------------------------------------------------------ */
 export async function loadContent({
   table,
   slug,
@@ -14,19 +24,22 @@ export async function loadContent({
 }) {
   const supabase = createClient();
 
+  /* --------------------- POST ZNOTRAJ KATEGORIJE --------------------- */
   if (table === "posts" && categorySlug) {
-    const { data: cat, error: catError } = await supabase
+    /* category id */
+    const { data: cat, error: catErr } = await supabase
       .from("categories")
       .select("id")
       .eq("slug", categorySlug)
       .single();
 
-    if (catError || !cat) {
-      console.error(catError);
+    if (catErr || !cat) {
+      console.error(catErr);
       notFound();
     }
 
-    const { data: post, error: postError } = await supabase
+    /* post */
+    const { data: post, error: postErr } = await supabase
       .from("posts")
       .select("*")
       .eq("slug", slug)
@@ -34,8 +47,8 @@ export async function loadContent({
       .eq("is_draft", false)
       .single();
 
-    if (postError || !post) {
-      console.error(postError);
+    if (postErr || !post) {
+      console.error(postErr);
       notFound();
     }
 
@@ -44,22 +57,22 @@ export async function loadContent({
     return {
       data: {
         ...post,
-        images: Array.isArray(post.images) ? post.images : [], // 🔥 vedno array, tudi če manjka
+        images: toUrlArray(post.images), // ← samo URL-ovi
       },
       MDXContent,
     };
   }
 
-  // ==================== Če je stran (page) ====================
-  const { data: page, error: pageError } = await supabase
+  /* ----------------------------- PAGE ------------------------------- */
+  const { data: page, error: pageErr } = await supabase
     .from("pages")
     .select("*")
     .eq("slug", slug)
     .eq("is_draft", false)
     .single();
 
-  if (pageError || !page) {
-    console.error(pageError);
+  if (pageErr || !page) {
+    console.error(pageErr);
     notFound();
   }
 
@@ -68,13 +81,15 @@ export async function loadContent({
   return {
     data: {
       ...page,
-      images: [], // 🔥 pages nimajo images => prazen array
+      images: [], // pages nimajo images
     },
     MDXContent,
   };
 }
 
-// ==================== ZA SEZNAM OBJAV ====================
+/* ------------------------------------------------------------------ */
+/*                         SEZNAM OBJAV (posts)                       */
+/* ------------------------------------------------------------------ */
 export async function loadContentList({
   table,
   categorySlug,
@@ -85,26 +100,28 @@ export async function loadContentList({
   const supabase = createClient();
 
   if (table === "posts" && categorySlug) {
-    const { data: cat, error: catError } = await supabase
+    /* category id */
+    const { data: cat, error: catErr } = await supabase
       .from("categories")
       .select("id")
       .eq("slug", categorySlug)
       .single();
 
-    if (catError || !cat) {
-      console.error(catError);
+    if (catErr || !cat) {
+      console.error(catErr);
       notFound();
     }
 
-    const { data: posts, error: postsError } = await supabase
+    /* posts */
+    const { data: posts, error: postsErr } = await supabase
       .from("posts")
       .select("id, title, slug, published_at")
       .eq("category_id", cat.id)
       .eq("is_draft", false)
       .order("published_at", { ascending: false });
 
-    if (postsError || !posts) {
-      console.error(postsError);
+    if (postsErr || !posts) {
+      console.error(postsErr);
       notFound();
     }
 
