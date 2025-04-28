@@ -42,39 +42,31 @@ export default async function HomePage() {
       </section>
 
       {/* Dinamične kategorije */}
-      <section className="py-24 px-6 md:px-16 w-full flex flex-col gap-32">
-        {categories?.map((cat, index) => (
-          <div
-            key={cat.id}
-            className={`flex flex-col md:flex-row ${
-              index % 2 === 0 ? "md:flex-row-reverse" : ""
-            } items-center gap-16`}
-          >
-            <div className="relative w-full md:w-1/2 h-72 md:h-[480px]">
-              <Image
-                src={`/images/${cat.slug}.jpg`} // npr: umetna-inteligenca.jpg
-                alt={cat.name}
-                fill
-                className="object-cover rounded-xl"
-              />
-            </div>
-            <div className="w-full md:w-1/2">
-              <h2 className="font-heading text-4xl text-secondary mb-6">
-                {cat.name}
-              </h2>
-              <p className="font-body text-lg text-muted-foreground leading-relaxed mb-4">
-                {/* Lahko dodaš opis kategorije če imaš `cat.description` */}
-              </p>
-              <Link
-                href={`/${cat.slug}`}
-                className="inline-block font-subheading text-base px-6 py-2 rounded-md bg-muted text-foreground hover:bg-muted/60 transition"
-              >
-                Poglej objave →
-              </Link>
-            </div>
-          </div>
-        ))}
-      </section>
+     <section className="py-24 px-6 md:px-16 w-full grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12">
+  {categories?.map((cat) => (
+    <Link
+      key={cat.id}
+      href={`/${cat.slug}`}
+      className="group rounded-xl overflow-hidden bg-muted hover:shadow-lg transition transform hover:scale-105"
+    >
+      <div className="relative h-64">
+        <Image
+          src={`/images/${cat.slug}.jpg`}
+          alt={cat.name}
+          fill
+          className="object-cover group-hover:opacity-80 transition"
+        />
+      </div>
+      <div className="p-6">
+        <h3 className="text-2xl font-bold mb-2">{cat.name}</h3>
+        <p className="text-muted-foreground text-sm">
+          {/* cat.description ? cat.description : "Preberi več" */}
+        </p>
+      </div>
+    </Link>
+  ))}
+</section>
+
     </main>
   );
 }
