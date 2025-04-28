@@ -42,30 +42,29 @@ export default async function HomePage() {
       </section>
 
       {/* Dinamične kategorije */}
-     <section className="py-24 px-6 md:px-16 w-full grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12">
+<section className="w-full">
   {categories?.map((cat) => (
-    <Link
-      key={cat.id}
-      href={`/${cat.slug}`}
-      className="group rounded-xl overflow-hidden bg-muted hover:shadow-lg transition transform hover:scale-105"
-    >
-      <div className="relative h-64">
-        <Image
-          src={`/images/${cat.slug}.jpg`}
-          alt={cat.name}
-          fill
-          className="object-cover group-hover:opacity-80 transition"
-        />
+    <div key={cat.id} className="relative h-[80vh] flex items-center justify-center text-center">
+      <Image
+        src={`/images/${cat.slug}.jpg`}
+        alt={cat.name}
+        fill
+        className="object-cover"
+      />
+      <div className="absolute inset-0 bg-black/40 backdrop-blur-sm"></div>
+      <div className="relative z-10 text-white px-6">
+        <h2 className="text-4xl md:text-6xl font-bold mb-4">{cat.name}</h2>
+        <Link
+          href={`/${cat.slug}`}
+          className="inline-block mt-4 px-6 py-3 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90"
+        >
+          Poglej objave →
+        </Link>
       </div>
-      <div className="p-6">
-        <h3 className="text-2xl font-bold mb-2">{cat.name}</h3>
-        <p className="text-muted-foreground text-sm">
-          {/* cat.description ? cat.description : "Preberi več" */}
-        </p>
-      </div>
-    </Link>
+    </div>
   ))}
 </section>
+
 
     </main>
   );
