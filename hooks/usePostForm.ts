@@ -22,7 +22,8 @@ export const usePostForm = () => {
   /* ------------------------------- STATE -------------------------------- */
   const [title, setTitle]         = useState("");
   const [published, setPublished] = useState(false);
-  const [sections, setSections]   = useState<UiSection[]>([
+
+  const [sections, setSections] = useState<UiSection[]>([
     { heading: "", content: "", imageUrl: "", uploadedImagePath: null },
   ]);
   const [selectedTab, setSelectedTab] = useState("0");
@@ -30,7 +31,7 @@ export const usePostForm = () => {
   const [categories, setCategories] = useState<{ id: string; name: string }[]>([]);
   const [categoryId, setCategoryId]  = useState("");
 
-  const [images, setImages] = useState<ImageRef[]>([]);            // [cover, s1, s2…]
+  const [images, setImages] = useState<ImageRef[]>([]);          // [cover, s1, s2…]
   const [coverUploadedPath, setCoverUploadedPath] = useState<string | null>(null);
 
   const [loading, setLoading] = useState(false);
@@ -41,19 +42,21 @@ export const usePostForm = () => {
     (async () => {
       await fetchCategories();
       if (isEdit) await fetchPost();
-      else        setImages([{ url: "", path: null }]); // cover placeholder for new post
+      else        setImages([{ url: "", path: null }]); // placeholder za cover
     })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [slug]);
 
   const fetchCategories = async () => {
-    const { data, error } = await supabase.from("categories").select("id, name");
-    if (error) return toast.error("Greška pri dohvatu kategorija");
-    setCategories(data ?? []);
+    const { data, error } =
+      await supabase.from("categories").select("id, name");
+    if (error) toast.error("Greška pri dohvatu kategorija");
+    else       setCategories(data ?? []);
   };
 
   const fetchPost = async () => {
-    const { data, error } = await supabase.from("posts").select("*").eq("slug", slug!).single();
+    const { data, error } =
+      await supabase.from("posts").select("*").eq("slug", slug!).single();
     if (error || !data) {
       toast.error("Greška pri dohvatu posta");
       router.push("/dashboard/posts");
@@ -64,31 +67,40 @@ export const usePostForm = () => {
     setPublished(!data.is_draft);
     setCategoryId(data.category_id);
 
-    /* — images: pretvori string[]  →  ImageRef[] ------------------------ */
-    const imgArr: ImageRef[] = (Array.isArray(data.images) ? data.images : []).map((img: any) =>
-      typeof img === "string" ? { url: img, path: null } : img
-    );
-    if (imgArr.length === 0) imgArr.push({ url: "", path: null }); // safety
+    /* images mogu već biti [{url,path}] ili stari string[] */
+    const imgArr: ImageRef[] = (Array.isArray(data.images) ? data.images : [])
+      .map((img: any) =>
+        typeof img === "string" ? { url: img, path: null } : img,
+      );
+    if (imgArr.length === 0) imgArr.push({ url: "", path: null });
     setImages(imgArr);
     setCoverUploadedPath(imgArr[0]?.path ?? null);
 
-    /* — sections -------------------------------------------------------- */
+    /* sections + pripadajući path za svaku sliku */
     const baseSecs    = parseMarkdownToSections(data.content_md || "");
     const sectionsTmp = attachSectionImages(baseSecs, imgArr.map(i => i.url));
-    // prepiši uploadedImagePath iz imgArr
-    sectionsTmp.forEach((s, i) => (s.uploadedImagePath = imgArr[i + 1]?.path ?? null));
+    sectionsTmp.forEach(
+      (s, i) => (s.uploadedImagePath = imgArr[i + 1]?.path ?? null),
+    );
     setSections(sectionsTmp.length ? sectionsTmp : sections);
     setSelectedTab("0");
   };
 
   /* ------------------------------ HANDLERS ------------------------------ */
   const addSection = () => {
-    setSections(p => [...p, { heading: "", content: "", imageUrl: "", uploadedImagePath: null }]);
-    setImages  (p => [...p, { url: "", path: null }]);
+    setSections(p => [
+      ...p,
+      { heading: "", content: "", imageUrl: "", uploadedImagePath: null },
+    ]);
+    setImages(p => [...p, { url: "", path: null }]);
     setSelectedTab(String(sections.length));
   };
 
-  const updateSection = (idx: number, field: "heading" | "content", val: string) =>
+  const updateSection = (
+    idx: number,
+    field: "heading" | "content",
+    val: string,
+  ) =>
     setSections(p => {
       const u = [...p];
       (u[idx] as any)[field] = val;
@@ -96,7 +108,10 @@ export const usePostForm = () => {
     });
 
   const deleteSection = (idx: number) => {
-    if (sections.length <= 1) return toast.error("Mora postojati barem jedna sekcija");
+    if (sections.length <= 1) {
+      toast.error("Mora postojati barem jedna sekcija");
+      return;
+    }
     if (!confirm("Izbrisati sekciju?")) return;
     setSections(p => p.filter((_, i) => i !== idx));
     setImages  (p => p.filter((_, i) => i !== idx + 1)); // +1 jer je 0 cover
@@ -105,7 +120,9 @@ export const usePostForm = () => {
 
   /* ------------------------------ IMAGES -------------------------------- */
   const setCoverImage = async (ref: ImageRef) => {
-    if (coverUploadedPath) await supabase.storage.from("images").remove([coverUploadedPath]);
+    if (coverUploadedPath) {
+      await supabase.storage.from("images").remove([coverUploadedPath]);
+    }
     setImages(p => {
       const u = [...p];
       u[0] = ref;
@@ -121,7 +138,7 @@ export const usePostForm = () => {
     /* UI sekcija */
     setSections(p => {
       const u = [...p];
-      u[idx].imageUrl         = ref.url;
+      u[idx].imageUrl          = ref.url;
       u[idx].uploadedImagePath = ref.path;
       return u;
     });
@@ -129,7 +146,8 @@ export const usePostForm = () => {
     /* images[] */
     setImages(p => {
       const u = [...p];
-      u[idx + 1] = ref;         // +1 jer 0 = cover
+      while (u.length <= idx + 1) u.push({ url: "", path: null }); // osiguraj duljinu
+      u[idx + 1] = ref;  // +1 jer 0 = cover
       return u;
     });
   };
@@ -146,7 +164,8 @@ export const usePostForm = () => {
     }
 
     setLoading(true);
-    const content_md = stringifySectionsToMarkdown(sections);
+    const content_md   = stringifySectionsToMarkdown(sections);
+    const imagesToSave = images; // šaljemo cijele objekte [{url,path}]
 
     try {
       if (isEdit) {
@@ -157,33 +176,37 @@ export const usePostForm = () => {
             content_md,
             is_draft: !published,
             category_id: categoryId,
-            images,
+            images: imagesToSave,
           })
           .eq("slug", slug!);
         if (error) throw error;
         toast.success("Post ažuriran");
       } else {
-        const newSlug = title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)+/g, "");
+        const newSlug = title
+          .toLowerCase()
+          .replace(/[^a-z0-9]+/g, "-")
+          .replace(/(^-|-$)+/g, "");
         const { error } = await supabase.from("posts").insert({
           title,
           slug: newSlug,
           content_md,
           is_draft: !published,
           category_id: categoryId,
-          images,
+          images: imagesToSave,
         });
         if (error) throw error;
         toast.success("Post kreiran");
       }
       router.push("/dashboard/posts");
-    } catch {
+    } catch (err) {
+      console.error(err);
       toast.error("Greška pri spremanju");
     } finally {
       setLoading(false);
     }
   };
 
-  /* -------------------------------- API --------------------------------- */
+  /* -------------------------------- PUBLIC API -------------------------- */
   return {
     /* state */
     title,
