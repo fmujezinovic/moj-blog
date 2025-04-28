@@ -3,11 +3,11 @@ import { parseMDX }     from "@/lib/parse-mdx";
 import { notFound }     from "next/navigation";
 
 /* ------------------------------------------------------------------ */
-/*                              1. HELPERS                            */
+/*                               HELPERS                              */
 /* ------------------------------------------------------------------ */
 const toUrlArray = (raw: any): string[] =>
   Array.isArray(raw)
-    ? raw.map((item: any) => (typeof item === "string" ? item : item.url))
+    ? raw.map((i: any) => (typeof i === "string" ? i : i.url))
     : [];
 
 /* ------------------------------------------------------------------ */
@@ -24,41 +24,52 @@ export async function loadContent({
 }) {
   const supabase = createClient();
 
-  /* --------------------- POST ZNOTRAJ KATEGORIJE --------------------- */
+  /* -------- POST znotraj kategorije (public prikaz) -------- */
   if (table === "posts" && categorySlug) {
-    /* category id */
     const { data: cat, error: catErr } = await supabase
       .from("categories")
       .select("id")
       .eq("slug", categorySlug)
       .single();
-
     if (catErr || !cat) {
       console.error(catErr);
       notFound();
     }
 
-    /* post */
     const { data: post, error: postErr } = await supabase
       .from("posts")
-      .select("*")
+      .select("*, categories ( slug )")
       .eq("slug", slug)
       .eq("category_id", cat.id)
       .eq("is_draft", false)
       .single();
-
     if (postErr || !post) {
       console.error(postErr);
       notFound();
     }
 
     const MDXContent = await parseMDX(post.content_md);
-
     return {
-      data: {
-        ...post,
-        images: toUrlArray(post.images), // ← samo URL-ovi
-      },
+      data: { ...post, images: toUrlArray(post.images) },
+      MDXContent,
+    };
+  }
+
+  /* -------- POST brez categorySlug (admin viewer) -------- */
+  if (table === "posts" && !categorySlug) {
+    const { data: post, error } = await supabase
+      .from("posts")
+      .select("*, categories ( slug )")
+      .eq("slug", slug)
+      .single();
+    if (error || !post) {
+      console.error(error);
+      notFound();
+    }
+
+    const MDXContent = await parseMDX(post.content_md);
+    return {
+      data: { ...post, images: toUrlArray(post.images) },
       MDXContent,
     };
   }
@@ -70,19 +81,14 @@ export async function loadContent({
     .eq("slug", slug)
     .eq("is_draft", false)
     .single();
-
   if (pageErr || !page) {
     console.error(pageErr);
     notFound();
   }
 
   const MDXContent = await parseMDX(page.content_md);
-
   return {
-    data: {
-      ...page,
-      images: [], // pages nimajo images
-    },
+    data: { ...page, images: [] }, // pages nimajo images
     MDXContent,
   };
 }
@@ -100,26 +106,22 @@ export async function loadContentList({
   const supabase = createClient();
 
   if (table === "posts" && categorySlug) {
-    /* category id */
     const { data: cat, error: catErr } = await supabase
       .from("categories")
       .select("id")
       .eq("slug", categorySlug)
       .single();
-
     if (catErr || !cat) {
       console.error(catErr);
       notFound();
     }
 
-    /* posts */
     const { data: posts, error: postsErr } = await supabase
       .from("posts")
       .select("id, title, slug, published_at")
       .eq("category_id", cat.id)
       .eq("is_draft", false)
       .order("published_at", { ascending: false });
-
     if (postsErr || !posts) {
       console.error(postsErr);
       notFound();

@@ -76,8 +76,9 @@ export default function PostSectionEditor({
         />
         <Button
           type="button"
-          variant="destructive"
+          variant="outline"
           size="sm"
+          className="text-red-600 hover:bg-red-50" /* crveni tekst */
           onClick={() => onDelete(idx)}
         >
           Izbriši sekciju

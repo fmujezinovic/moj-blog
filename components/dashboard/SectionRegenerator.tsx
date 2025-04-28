@@ -46,7 +46,7 @@ export default function SectionRegenerator({ sectionTitle, onRegenerate }: Secti
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant="secondary" size="sm">
+        <Button variant="outline" size="sm">
           Regeneriraj
         </Button>
       </DialogTrigger>
