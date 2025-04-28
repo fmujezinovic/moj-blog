@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 import { ReactNode, Children, isValidElement, cloneElement } from "react";
 import { motion } from "framer-motion";
@@ -9,6 +9,7 @@ interface FancyPostLayoutProps {
   images?: string[];
 }
 
+// Animacije
 const fadeIn = {
   hidden: { opacity: 0, y: 30 },
   visible: { opacity: 1, y: 0, transition: { duration: 0.7, ease: "easeOut" } },
@@ -36,7 +37,7 @@ export default function FancyPostLayout({ title, content, images = [] }: FancyPo
   }
 
   return (
-    <div className="flex flex-col gap-20 max-w-5xl mx-auto px-6 py-12">
+    <div className="flex flex-col gap-20 max-w-5xl mx-auto px-6 py-12 bg-muted min-h-screen">
       {/* Cover Image */}
       {images[0] && (
         <motion.div
@@ -44,7 +45,7 @@ export default function FancyPostLayout({ title, content, images = [] }: FancyPo
           whileInView="visible"
           viewport={{ once: true }}
           variants={fadeIn}
-          className="w-full h-64 md:h-96 overflow-hidden rounded-xl shadow-md mb-8"
+          className="w-full h-64 md:h-96 overflow-hidden rounded-2xl shadow-md mb-12"
         >
           <img
             src={images[0]}
@@ -60,7 +61,7 @@ export default function FancyPostLayout({ title, content, images = [] }: FancyPo
         whileInView="visible"
         viewport={{ once: true }}
         variants={fadeIn}
-        className="font-heading text-4xl md:text-5xl text-center text-primary mb-12 leading-tight"
+        className="font-heading text-4xl md:text-5xl text-center text-heading mb-16 leading-tight"
       >
         {title}
       </motion.h1>
@@ -84,30 +85,49 @@ export default function FancyPostLayout({ title, content, images = [] }: FancyPo
               },
             },
           }}
-          className={`flex flex-col md:flex-row items-center gap-10 ${
-            index % 2 === 0 ? "" : "md:flex-row-reverse"
-          }`}
+          className="bg-white rounded-2xl shadow-md p-8 grid md:grid-cols-2 gap-8 items-center"
         >
-          {/* Section Image */}
-          {images[index + 1] && (
-            <div className="relative w-full md:w-1/2 h-64 md:h-80 overflow-hidden rounded-xl shadow-md">
-              <img
-                src={images[index + 1]}
-                alt={`Slika sekcije ${index + 1}`}
-                className="object-cover w-full h-full transition-transform duration-500 hover:scale-105"
-              />
-            </div>
+          {index % 2 === 0 ? (
+            <>
+              <div>
+                {cloneElement(section.heading as React.ReactElement, {
+                  className: "font-heading text-3xl sm:text-4xl text-heading mb-6",
+                })}
+                <div className="space-y-4 text-lg font-subheading text-foreground leading-relaxed text-justify">
+                  {section.body}
+                </div>
+              </div>
+              {images[index + 1] && (
+                <div>
+                  <img
+                    src={images[index + 1]}
+                    alt={`Slika sekcije ${index + 1}`}
+                    className="rounded-xl shadow-md object-cover w-full h-64 md:h-80"
+                  />
+                </div>
+              )}
+            </>
+          ) : (
+            <>
+              {images[index + 1] && (
+                <div className="order-2 md:order-1">
+                  <img
+                    src={images[index + 1]}
+                    alt={`Slika sekcije ${index + 1}`}
+                    className="rounded-xl shadow-md object-cover w-full h-64 md:h-80"
+                  />
+                </div>
+              )}
+              <div className="order-1 md:order-2">
+                {cloneElement(section.heading as React.ReactElement, {
+                  className: "font-heading text-3xl sm:text-4xl text-heading mb-6",
+                })}
+                <div className="space-y-4 text-lg font-subheading text-foreground leading-relaxed text-justify">
+                  {section.body}
+                </div>
+              </div>
+            </>
           )}
-
-          {/* Section Text */}
-          <div className="w-full md:w-1/2">
-            {cloneElement(section.heading as React.ReactElement, {
-              className: "font-subheading text-2xl md:text-3xl text-secondary mb-4 leading-tight",
-            })}
-            <div className="space-y-4 text-base md:text-lg font-body text-foreground text-justify">
-              {section.body}
-            </div>
-          </div>
         </motion.div>
       ))}
     </div>

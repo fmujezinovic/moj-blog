@@ -53,16 +53,16 @@ export default function FancyPageLayout({ content, images, heroImage }: FancyPag
           whileInView="visible"
           viewport={{ once: true }}
           variants={fadeInUp}
-          className="text-center mb-6"
+          className="text-center mb-12"
         >
           {cloneElement(mainHeading as React.ReactElement, {
-            className: 'font-heading text-h1 text-primary mb-4',
+            className: 'font-heading text-5xl sm:text-6xl text-primary mb-6',
           })}
           {heroImage && (
             <img
               src={heroImage}
               alt="Glavna slika"
-              className="w-40 h-40 rounded-full object-cover mx-auto shadow-md"
+              className="w-40 h-40 rounded-full object-cover mx-auto shadow-lg"
             />
           )}
         </motion.div>
@@ -87,17 +87,15 @@ export default function FancyPageLayout({ content, images, heroImage }: FancyPag
               },
             },
           }}
-          className={`grid md:grid-cols-2 gap-8 items-center py-12 px-4 rounded-xl ${
-            index % 2 === 0 ? 'bg-card' : 'bg-muted'
-          }`}
+          className="bg-white rounded-2xl shadow-md p-8 grid md:grid-cols-2 gap-8 items-center"
         >
           {index % 2 === 0 ? (
             <>
               <div>
                 {cloneElement(section.heading as React.ReactElement, {
-                  className: 'font-subheading text-h2 text-secondary mb-4',
+                  className: 'font-heading text-3xl sm:text-4xl text-heading mb-6',
                 })}
-                <div className="space-y-4 text-base font-body text-foreground text-justify">
+                <div className="space-y-4 text-lg font-subheading text-foreground leading-relaxed text-justify">
                   {section.body}
                 </div>
               </div>
@@ -105,7 +103,7 @@ export default function FancyPageLayout({ content, images, heroImage }: FancyPag
                 <img
                   src={images[index % images.length]}
                   alt={`Slika sekcije ${index + 1}`}
-                  className="rounded-lg shadow-md"
+                  className="rounded-xl shadow-md"
                 />
               </div>
             </>
@@ -115,14 +113,14 @@ export default function FancyPageLayout({ content, images, heroImage }: FancyPag
                 <img
                   src={images[index % images.length]}
                   alt={`Slika sekcije ${index + 1}`}
-                  className="rounded-lg shadow-md"
+                  className="rounded-xl shadow-md"
                 />
               </div>
               <div className="order-1 md:order-2">
                 {cloneElement(section.heading as React.ReactElement, {
-                  className: 'font-subheading text-h2 text-secondary mb-4',
+                  className: 'font-heading text-3xl sm:text-4xl text-heading mb-6',
                 })}
-                <div className="space-y-4 text-base font-body text-foreground text-justify">
+                <div className="space-y-4 text-lg font-subheading text-foreground leading-relaxed text-justify">
                   {section.body}
                 </div>
               </div>
