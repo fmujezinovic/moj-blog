@@ -1,36 +1,41 @@
 "use server";
 
-import { createClient } from "@/utils/supabase/server";
 import { v4 as uuidv4 } from "uuid";
+import { createClient } from "@/utils/supabase/server"; // = createServerSupabase()
+import type { ImageRef } from "@/types/image";
 
-export async function uploadImage(file: File) {
-  const supabase = createClient();
-  const fileExt = file.name.split('.').pop();
-  const fileName = `${uuidv4()}.${fileExt}`;
-  const filePath = `${fileName}`;
+/**
+ * Upload image to Supabase Storage and return public URL + path.
+ */
+export async function uploadImage(file: File): Promise<ImageRef> {
+  const supabase = createClient();                    // per-request client
 
-  const { data, error } = await supabase
-    .storage
-    .from('images')
-    .upload(filePath, file, {
-      cacheControl: '3600',
-      upsert: false,
-    });
+  /* ---- generate unique name ------------------------------------------------ */
+  const ext      = file.name.split(".").pop();
+  const fileName = `${uuidv4()}.${ext}`;              // abc123.jpg
+  const filePath = fileName;                          // folder structure optional
 
-  if (error) {
+  /* ---- upload -------------------------------------------------------------- */
+  const { data, error } = await supabase.storage
+    .from("images")
+    .upload(filePath, file, { cacheControl: "3600", upsert: false });
+
+  if (error || !data) {
     console.error(error);
-    throw new Error('Napaka pri nalaganju slike.');
+    throw new Error("Napaka pri nalaganju slike.");
   }
 
-  const { data: publicUrlData, error: urlError } = supabase
-    .storage
-    .from('images')
+  /* ---- public URL ---------------------------------------------------------- */
+  const { data: urlData, error: urlErr } = supabase.storage
+    .from("images")
     .getPublicUrl(filePath);
 
-  if (urlError) {
-    console.error(urlError);
-    throw new Error('Napaka pri pridobivanju URL slike.');
+  if (urlErr || !urlData?.publicUrl) {
+    console.error(urlErr);
+    throw new Error("Napaka pri pridobivanju URL-ja slike.");
   }
 
-  return publicUrlData?.publicUrl;
+  /* ---- ready to return ----------------------------------------------------- */
+  const ref: ImageRef = { url: urlData.publicUrl, path: data.path }; // <-- path bitan za kasnije brisanje
+  return ref;
 }
