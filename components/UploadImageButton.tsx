@@ -1,96 +1,74 @@
 "use client";
 
-import type { ImageRef } from "@/types/image";
-
-import { useRef, useState } from "react";
-import { toast } from "sonner";
-import { createClient } from "@/utils/supabase/client";
-import { v4 as uuidv4 } from "uuid";
+import { useEffect, useRef, useState } from "react";
+import { v4 as uuidv4 }       from "uuid";
+import { toast }              from "sonner";
+import { createClient }       from "@/utils/supabase/client";
+import type { ImageRef }      from "@/types/image";
 
 interface UploadImageButtonProps {
-  currentUploadedPath: string | null;
-  onUploaded: (ref: ImageRef) => void;   // sada prima objekt
+  currentUploadedPath: string | null;   // path prethodne datoteke u bucketu
+  onUploaded: (ref: ImageRef) => void;  // rezultat upload-a
+  externalUrl?: string;                 // prikaz Unsplash / Pexels URL-a
 }
 
-export default function UploadImageButton({ currentUploadedPath, onUploaded }: UploadImageButtonProps) {
+export default function UploadImageButton({
+  currentUploadedPath,
+  onUploaded,
+  externalUrl,
+}: UploadImageButtonProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const [uploading, setUploading] = useState(false);
-  const [progress, setProgress] = useState(0);
+
+  const [uploading,   setUploading]   = useState(false);
+  const [progress,    setProgress]    = useState(0);
   const [uploadedUrl, setUploadedUrl] = useState<string | null>(null);
 
   const supabase = createClient();
 
-  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    await uploadSelectedFile(file);
-  };
+  /* ↻  kad vanjski URL stigne (Unsplash / Pexels) – pokaži thumbnail   */
+  useEffect(() => {
+    if (externalUrl) setUploadedUrl(externalUrl);
+  }, [externalUrl]);
 
-  const handlePaste = async (e: React.ClipboardEvent<HTMLDivElement>) => {
-    const items = e.clipboardData.items;
-    for (const item of items) {
-      if (item.type.includes("image")) {
-        const file = item.getAsFile();
-        if (file) {
-          await uploadSelectedFile(file);
-        }
-      }
-    }
-  };
+  /* ----------------------- Local helpers ---------------------------- */
+  const emptyRef: ImageRef = { url: "", path: null };
 
   const uploadSelectedFile = async (file: File) => {
     try {
       setUploading(true);
       setProgress(0);
 
+      /* briši staru (ako je bila upload-ana) */
       if (currentUploadedPath) {
-        const { error } = await supabase.storage.from("images").remove([currentUploadedPath]);
-        if (error) {
-          console.error("Napaka pri brisanju stare slike:", error.message);
-        } else {
-          await new Promise((resolve) => setTimeout(resolve, 2000));
-        }
+        await supabase.storage.from("images").remove([currentUploadedPath]);
       }
 
-      const fileExt = file.name.split(".").pop();
-      const fileName = `${uuidv4()}.${fileExt}`;
-      const filePath = `${fileName}`;
-
-      const { data, error: uploadError } = await supabase.storage
+      /* upload */
+      const ext      = file.name.split(".").pop();
+      const fileName = `${uuidv4()}.${ext}`;
+      const { data, error } = await supabase.storage
         .from("images")
-        .upload(filePath, file, {
-          cacheControl: "3600",
-          upsert: false,
-        });
+        .upload(fileName, file, { cacheControl: "3600" });
 
-      if (uploadError) {
-        console.error(uploadError);
-        throw new Error("Napaka pri nalaganju slike.");
-      }
+      if (error || !data) throw new Error("Upload failed");
 
+      /* animacija progres bara (opcionalno) */
       for (let i = 0; i <= 100; i += 10) {
-        await new Promise((resolve) => setTimeout(resolve, 20));
+        await new Promise(r => setTimeout(r, 20));
         setProgress(i);
       }
 
-      const { data: publicUrlData, error: urlError } = supabase
-        .storage
-        .from('images')
-        .getPublicUrl(filePath);
+      /* public URL */
+      const { data: urlData, error: urlErr } = supabase
+        .storage.from("images")
+        .getPublicUrl(data.path);
+      if (urlErr || !urlData?.publicUrl) throw new Error("No public URL");
 
-      if (urlError || !publicUrlData?.publicUrl) {
-        console.error(urlError);
-        throw new Error("Napaka pri pridobivanju URL-ja slike.");
-      }
-
-      setUploadedUrl(publicUrlData.publicUrl);
-
-      onUploaded({ url: publicUrlData.publicUrl, path: filePath });
-
-
+      setUploadedUrl(urlData.publicUrl);
+      onUploaded({ url: urlData.publicUrl, path: data.path });
       toast.success("Slika uspešno naložena!");
-    } catch (error) {
-      console.error(error);
+    } catch (err) {
+      console.error(err);
       toast.error("Napaka pri nalaganju slike.");
     } finally {
       setUploading(false);
@@ -99,21 +77,34 @@ export default function UploadImageButton({ currentUploadedPath, onUploaded }: U
   };
 
   const handleRemoveImage = async () => {
-    if (currentUploadedPath) {
-      const { error } = await supabase.storage.from("images").remove([currentUploadedPath]);
-      if (error) {
-        console.error("Napaka pri brisanju slike:", error.message);
-        toast.error("Napaka pri brisanju slike.");
-        return;
+    try {
+      if (currentUploadedPath) {
+        await supabase.storage.from("images").remove([currentUploadedPath]);
       }
-      await new Promise((resolve) => setTimeout(resolve, 2000));
+      setUploadedUrl(null);
+      onUploaded(emptyRef);
+      toast.success("Slika odstranjena!");
+    } catch {
+      toast.error("Napaka pri brisanju slike.");
     }
-    setUploadedUrl(null);
-    onUploaded({ url: "", path: null });
-
-    toast.success("Slika uspešno odstranjena!");
   };
 
+  /* --------------------------- Handlers ---------------------------- */
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) uploadSelectedFile(file);
+  };
+
+  const handlePaste = (e: React.ClipboardEvent<HTMLDivElement>) => {
+    for (const item of e.clipboardData.items) {
+      if (item.type.includes("image")) {
+        const file = item.getAsFile();
+        if (file) uploadSelectedFile(file);
+      }
+    }
+  };
+
+  /* ---------------------------- UI --------------------------------- */
   return (
     <div
       onPaste={handlePaste}
@@ -130,12 +121,12 @@ export default function UploadImageButton({ currentUploadedPath, onUploaded }: U
             onClick={handleRemoveImage}
             className="text-red-500 underline text-sm hover:text-red-600"
           >
-            Odstrani sliko
+            Odstrani sliku
           </button>
         </div>
       ) : uploading ? (
         <div className="space-y-2">
-          <div> Nalagam... {progress}% </div>
+          <div>Nalaganje… {progress}%</div>
           <div className="h-2 w-full bg-gray-200 rounded">
             <div
               className="h-2 bg-blue-500 rounded"
@@ -145,7 +136,7 @@ export default function UploadImageButton({ currentUploadedPath, onUploaded }: U
         </div>
       ) : (
         <div onClick={() => fileInputRef.current?.click()}>
-          Klikni za upload slike ali prilepi sliko (CTRL+V)
+          Klikni za upload slike ili prilepi (CTRL+V)
         </div>
       )}
 
