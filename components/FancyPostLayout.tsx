@@ -2,6 +2,7 @@
 
 import { ReactNode, Children, isValidElement, cloneElement } from "react";
 import { motion } from "framer-motion";
+import Image from "next/image"; // dodan import za optimizovane slike
 
 interface FancyPostLayoutProps {
   title: string;
@@ -45,12 +46,16 @@ export default function FancyPostLayout({ title, content, images = [] }: FancyPo
           whileInView="visible"
           viewport={{ once: true }}
           variants={fadeIn}
-          className="w-full h-64 md:h-96 overflow-hidden rounded-2xl shadow-md mb-12"
+          className="w-full h-64 md:h-96 overflow-hidden rounded-2xl shadow-md mb-12 relative"
         >
-          <img
+          <Image
             src={images[0]}
             alt="Naslovna slika"
-            className="object-cover w-full h-full transition-transform duration-500 hover:scale-105"
+            fill
+            style={{ objectFit: "cover" }}
+            className="transition-transform duration-500 hover:scale-105"
+            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 80vw, 1200px"
+            priority
           />
         </motion.div>
       )}
@@ -98,11 +103,14 @@ export default function FancyPostLayout({ title, content, images = [] }: FancyPo
                 </div>
               </div>
               {images[index + 1] && (
-                <div>
-                  <img
+                <div className="relative w-full h-64 md:h-80">
+                  <Image
                     src={images[index + 1]}
                     alt={`Slika sekcije ${index + 1}`}
-                    className="rounded-xl shadow-md object-cover w-full h-64 md:h-80"
+                    fill
+                    style={{ objectFit: "cover" }}
+                    className="rounded-xl shadow-md"
+                    sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 600px"
                   />
                 </div>
               )}
@@ -110,11 +118,14 @@ export default function FancyPostLayout({ title, content, images = [] }: FancyPo
           ) : (
             <>
               {images[index + 1] && (
-                <div className="order-2 md:order-1">
-                  <img
+                <div className="order-2 md:order-1 relative w-full h-64 md:h-80">
+                  <Image
                     src={images[index + 1]}
                     alt={`Slika sekcije ${index + 1}`}
-                    className="rounded-xl shadow-md object-cover w-full h-64 md:h-80"
+                    fill
+                    style={{ objectFit: "cover" }}
+                    className="rounded-xl shadow-md"
+                    sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 600px"
                   />
                 </div>
               )}

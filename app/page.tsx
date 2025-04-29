@@ -6,7 +6,7 @@ import Image from "next/image";
 
 
 export default async function HomePage() {
-  const supabase = createClient();
+  const supabase = await createClient();
   const { data: categories } = await supabase
     .from("categories")
     .select("*")
@@ -15,6 +15,9 @@ export default async function HomePage() {
   return (
     <main className="flex flex-col bg-background text-foreground">
       {/* Hero sekcija */}
+      <h1 className="text-2xl font-bold mb-4">Test konekcije</h1>
+      
+
  <section className="min-h-screen flex flex-col justify-center items-center text-center px-6 py-16" style={{ backgroundColor: "#ACB0D4" }}>
       <div className="flex flex-col items-center gap-8">
         

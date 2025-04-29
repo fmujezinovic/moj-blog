@@ -7,13 +7,31 @@ import { redirect } from "next/navigation";
 const inter = Inter({ subsets: ["latin"], variable: "--font-sans" });
 
 export default async function DashboardLayout({ children }: { children: ReactNode }) {
-  const supabase = createClient();
+  const supabase = await createClient();
   const {
     data: { user },
+    error: userError,
   } = await supabase.auth.getUser();
 
-  // Dozvoli samo sebi (možeš koristiti email ili user.id)
-  if (!user || user.email !== "fmujezinovic@gmail.com") {
+  console.log("🧠 USER:", user);
+  if (userError) console.error("❌ User fetch error:", userError);
+
+  if (!user) {
+    console.warn("⛔ No user – redirecting to /login");
+    redirect("/login");
+  }
+
+  const { data: profile, error: profileError } = await supabase
+    .from("users")
+    .select("role")
+    .eq("id", user.id)
+    .single();
+
+  console.log("🔐 PROFILE:", profile);
+  if (profileError) console.error("❌ Profile fetch error:", profileError);
+
+  if (!profile || profile.role !== "admin") {
+    console.warn("⛔ Not admin – redirecting to /");
     redirect("/");
   }
 

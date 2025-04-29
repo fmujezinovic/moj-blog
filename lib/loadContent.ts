@@ -22,7 +22,7 @@ export async function loadContent({
   slug: string;
   categorySlug?: string;
 }) {
-  const supabase = createClient();
+  const supabase = await createClient();
 
   /* -------- POST znotraj kategorije (public prikaz) -------- */
   if (table === "posts" && categorySlug) {
