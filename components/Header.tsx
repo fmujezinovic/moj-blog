@@ -2,12 +2,19 @@
 
 import Link from "next/link";
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { createClient } from "@/utils/supabase/client";
 
 export default function Header() {
+  const router = useRouter();
+  const supabase = createClient();
+
   const [isScrolled, setIsScrolled] = useState(false);
   const [activeSection, setActiveSection] = useState<string | null>(null);
+  const [user, setUser] = useState<any>(null);
 
   useEffect(() => {
+    // Scroll handling
     function onScroll() {
       setIsScrolled(window.scrollY > 10);
 
@@ -32,6 +39,18 @@ export default function Header() {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
+  useEffect(() => {
+    // Dohvati korisnika ako je prijavljen
+    supabase.auth.getUser().then(({ data }) => {
+      setUser(data.user);
+    });
+  }, []);
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    router.push("/login");
+  };
+
   return (
     <header
       className={`sticky top-0 z-50 backdrop-blur transition-all ${
@@ -45,6 +64,7 @@ export default function Header() {
         >
           Domov
         </Link>
+
         <div className="flex items-center gap-8 text-sm font-medium">
           <NavLink href="/o-meni" isActive={false}>
             O meni
@@ -55,6 +75,15 @@ export default function Header() {
           <NavLink href="/#povezave" isActive={activeSection === "povezave"}>
             Povezave
           </NavLink>
+
+          {user && (
+            <button
+              onClick={handleLogout}
+              className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors"
+            >
+              Odjavi se
+            </button>
+          )}
         </div>
       </nav>
     </header>
@@ -76,7 +105,6 @@ function NavLink({ href, children, isActive }: NavLinkProps) {
       }`}
     >
       {children}
-      {/* Underline animacija */}
       <span
         className={`absolute left-0 -bottom-1 h-[2px] w-full bg-primary transition-transform duration-300 ${
           isActive ? "scale-x-100" : "scale-x-0"
