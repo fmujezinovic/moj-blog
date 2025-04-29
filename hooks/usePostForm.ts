@@ -71,7 +71,10 @@ if (!data) {
     setTitle(data.title);
     setPublished(!data.is_draft);
     setCategoryId(data.category_id);
-    setPublishDate(data.published_at ?? null);
+    console.log("RAW published_at:", data.published_at);
+
+setPublishDate(data.published_at ? new Date(data.published_at).toISOString() : null);
+
 
 
     /* images: konverzija */
@@ -172,7 +175,13 @@ if (!data) {
         if (error) throw error;
         toast.success("Post ažuriran");
       } else {
-        const newSlug = title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)+/g, "");
+       const newSlug = title
+  .toLowerCase()
+  .normalize("NFD")                   // Razdvoji slova i dijakritike
+  .replace(/[\u0300-\u036f]/g, "")   // Ukloni dijakritike (č → c, ž → z)
+  .replace(/[^a-z0-9]+/g, "-")       // Zameni sve osim slova/brojeva sa '-'
+  .replace(/(^-|-$)+/g, "");         // Ukloni suvišne crtice
+
         const { error } = await supabase.from("posts").insert({
   title,
   slug: newSlug,
