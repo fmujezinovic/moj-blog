@@ -129,12 +129,12 @@ export default function TablePosts({ data }: { data: Post[] }) {
       header: "Draft",
       cell: ({ getValue }) =>
         getValue<boolean>() ? (
-          <span className="text-xs px-2 py-1 bg-yellow-200 text-yellow-800 rounded-md">
-            Da
+          <span className="text-xs px-2 py-1 text-[#4b0082] rounded-md">
+            ✅
           </span>
         ) : (
-          <span className="text-xs px-2 py-1 bg-green-200 text-green-800 rounded-md">
-            Ne
+          <span className="text-xs px-2 py-1 text-[#4b0082]  rounded-md">
+            -
           </span>
         ),
       sortingFn: (a, b) => {
@@ -143,44 +143,37 @@ export default function TablePosts({ data }: { data: Post[] }) {
         return (aDraft === bDraft) ? 0 : aDraft ? -1 : 1;
       },
     },
-    {
-      header: "Status",
-      cell: ({ row }) => {
-        const post = row.original;
-        const now = new Date();
+{
+  header: "Status",
+  cell: ({ row }) => {
+    const post = row.original;
+    const now = new Date();
 
-        if (post.is_draft) {
-          return (
-            <span className="text-xs px-2 py-1 bg-yellow-100 text-yellow-700 rounded-md">
-              Draft
-            </span>
-          );
-        }
+    if (post.is_draft) {
+      return (
+        <span className="flex items-center gap-2 text-[#4b0082] font-semibold">
+          ✅ Draft
+        </span>
+      );
+    }
 
-        if (post.published_at && new Date(post.published_at) > now) {
-          return (
-            <span className="text-xs px-2 py-1 bg-blue-100 text-blue-700 rounded-md">
-              Scheduled
-            </span>
-          );
-        }
+    if (post.published_at && new Date(post.published_at) > now) {
+      return (
+        <span className="flex items-center gap-2 text-[#6a0dad] font-semibold">
+          🕒 Scheduled
+        </span>
+      );
+    }
 
-        return (
-          <span className="text-xs px-2 py-1 bg-green-100 text-green-700 rounded-md">
-            Published
-          </span>
-        );
-      },
-      sortingFn: (a, b) => {
-        const now = new Date();
-        const getStatus = (post: Post) => {
-          if (post.is_draft) return 0;
-          if (post.published_at && new Date(post.published_at) > now) return 1;
-          return 2;
-        };
-        return getStatus(a.original) - getStatus(b.original);
-      },
-    },
+    return (
+      <span className="flex items-center gap-2 text-[#8a2be2] font-semibold">
+        ✔️ Published
+      </span>
+    );
+  },
+},
+
+
     {
       accessorKey: "published_at",
       header: "Published",
