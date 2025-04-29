@@ -1,8 +1,39 @@
 "use server";
 
 import { GoogleGenerativeAI } from "@google/generative-ai";
+import { parseMarkdownToSections } from "@/utils/markdown";
+
 
 const genAI = new GoogleGenerativeAI(process.env.NEXT_PUBLIC_GEMINI_API_KEY!);
+
+export async function regenerateFullPostContent(title: string) {
+  const prompt = `
+Napiši članek na temo "${title}".
+Članek mora biti razdeljen natanko na 3 sekcije.
+Vsaka sekcija mora imeti naslov (## Naslov sekcije) in pod njim vsaj en paragraf kvalitetnega besedila.
+Ne piši uvoda, zaključka ali karkoli zunaj sekcij.
+Formatiraj članek v čisti Markdown obliki.
+
+Primer:
+## Naslov sekcije 1
+Besedilo prve sekcije...
+
+## Naslov sekcije 2
+Besedilo druge sekcije...
+
+## Naslov sekcije 3
+Besedilo tretje sekcije...
+`;
+
+  const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+
+  const result = await model.generateContent(prompt);
+  const response = await result.response;
+  const text = response.text();
+
+  return parseMarkdownToSections(text.trim()); // že razbije na sekcije
+}
+
 
 export async function regenerateSectionContent(sectionTitle: string, note: string) {
   const prompt = `

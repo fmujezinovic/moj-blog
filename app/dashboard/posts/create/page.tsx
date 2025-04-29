@@ -1,5 +1,7 @@
-import CreateOrEditPostPage from "@/components/dashboard/CreateOrEditPostPage";
+"use client";
+
+import PostFormPage from "@/components/dashboard/PostFormPage";
 
 export default function CreatePage() {
-  return <CreateOrEditPostPage />;
+  return <PostFormPage isEdit={false} />;
 }

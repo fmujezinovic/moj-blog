@@ -85,11 +85,14 @@ export const usePostForm = () => {
   };
 
   /* ------------- HANDLERS -------------- */
-  const addSection = () => {
-    setSections(p => [...p, { heading: "", content: "", imageUrl: "", uploadedImagePath: null }]);
-    setImages  (p => [...p, { url: "", path: null }]);
-    setSelectedTab(String(sections.length));
-  };
+ const addSection = () => {
+  let newIndex = sections.length;  // pravilno trenutni dolžina
+  setSections(p => [...p, { heading: "", content: "", imageUrl: "", uploadedImagePath: null }]);
+  setImages(p => [...p, { url: "", path: null }]);
+  setSelectedTab(String(newIndex));
+  return newIndex;   // ⬅⬅⬅ DODANO
+};
+
 
   const updateSection = (idx: number, field: "heading" | "content", val: string) =>
     setSections(p => {
@@ -181,24 +184,27 @@ export const usePostForm = () => {
     }
   };
 
-  /* -------- PUBLIC API -------- */
-  return {
-    title, setTitle,
-    published, setPublished,
-    sections,
-    selectedTab, setSelectedTab,
-    categories,
-    categoryId, setCategoryId,
-    images,
-    coverUploadedPath,
-    loading,
-    isEdit,
 
-    addSection,
-    updateSection,
-    deleteSection,
-    setSectionImage,
-    setCoverImage,
-    save,
-  };
+ /* -------- PUBLIC API -------- */
+return {
+  title, setTitle,
+  published, setPublished,
+  sections,
+  selectedTab, setSelectedTab,
+  categories,
+  categoryId, setCategoryId,
+  images,
+  coverUploadedPath,
+  loading,
+  setLoading,      // <<<<<< DODAJ TO!
+  isEdit,
+
+  addSection,
+  updateSection,
+  deleteSection,
+  setSectionImage,
+  setCoverImage,
+  save,
+};
+
 };

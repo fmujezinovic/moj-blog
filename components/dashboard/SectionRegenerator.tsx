@@ -22,6 +22,8 @@ interface SectionRegeneratorProps {
   onRegenerate: (newContent: string) => void;
 }
 
+
+
 export default function SectionRegenerator({ sectionTitle, onRegenerate }: SectionRegeneratorProps) {
   const [open, setOpen] = useState(false);
   const [note, setNote] = useState("");

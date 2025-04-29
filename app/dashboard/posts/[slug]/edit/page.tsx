@@ -2,5 +2,5 @@
 import PostFormPage from "components/dashboard/PostFormPage";
 
 export default function EditPostPage() {
-  return <PostFormPage />;
+  return <PostFormPage isEdit={true} />;
 }
