@@ -30,7 +30,9 @@ export const usePostForm = () => {
   const [images, setImages]           = useState<ImageRef[]>([]);
   const [coverUploadedPath, setCoverUploadedPath] = useState<string | null>(null);
   const [loading, setLoading]         = useState(false);
-  const isEdit                        = Boolean(slug);
+  const isEdit = Boolean(slug);
+  const [publishDate, setPublishDate] = useState<string | null>(null);
+
 
   /* ------------- FETCHING -------------- */
   useEffect(() => {
@@ -55,15 +57,22 @@ export const usePostForm = () => {
       .eq("slug", slug!)
       .single();
 
-    if (error || !data) {
-      toast.error("Greška pri dohvatu posta");
-      router.push("/dashboard/posts");
-      return;
-    }
+  if (error) {
+  toast.error("Greška pri dohvatu posta");
+  return;
+}
+
+if (!data) {
+  // Ako još nema podatka, samo NE diraj ništa (čekaj)
+  return;
+}
+
 
     setTitle(data.title);
     setPublished(!data.is_draft);
     setCategoryId(data.category_id);
+    setPublishDate(data.published_at ?? null);
+
 
     /* images: konverzija */
     const imgArr: ImageRef[] = (Array.isArray(data.images) ? data.images : [])
@@ -151,28 +160,29 @@ export const usePostForm = () => {
 
     try {
       if (isEdit) {
-        const { error } = await supabase
-          .from("posts")
-          .update({
-            title,
-            content_md,
-            is_draft: !published,
-            category_id: categoryId,
-            images,
-          })
-          .eq("slug", slug!);
+        const { error } = await supabase.from("posts").update({
+  title,
+  content_md,
+  is_draft: true, // ostaje true, dok cron ne aktivira
+  category_id: categoryId,
+  images,
+  published_at: publishDate,
+        }).eq("slug", slug!);
+        
         if (error) throw error;
         toast.success("Post ažuriran");
       } else {
         const newSlug = title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)+/g, "");
         const { error } = await supabase.from("posts").insert({
-          title,
-          slug: newSlug,
-          content_md,
-          is_draft: !published,
-          category_id: categoryId,
-          images,
-        });
+  title,
+  slug: newSlug,
+  content_md,
+  is_draft: true, // uvek true
+  category_id: categoryId,
+  images,
+  published_at: publishDate,
+
+});
         if (error) throw error;
         toast.success("Post kreiran");
       }
@@ -189,14 +199,14 @@ export const usePostForm = () => {
 return {
   title, setTitle,
   published, setPublished,
-  sections,
+  sections, setSections,    // ⬅⬅⬅ dodaj to vrstico
   selectedTab, setSelectedTab,
   categories,
   categoryId, setCategoryId,
   images,
   coverUploadedPath,
   loading,
-  setLoading,      // <<<<<< DODAJ TO!
+  setLoading,
   isEdit,
 
   addSection,
@@ -205,6 +215,8 @@ return {
   setSectionImage,
   setCoverImage,
   save,
+  publishDate, setPublishDate,
 };
+
 
 };

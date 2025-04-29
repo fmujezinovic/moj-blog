@@ -16,7 +16,9 @@ export default async function PostsPage() {
     slug,
     published_at,
     is_draft,
-    categories ( slug )
+    categories ( 
+    name,
+    slug )
   `)
   .order("published_at", { ascending: false });
 

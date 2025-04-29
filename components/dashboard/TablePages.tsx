@@ -190,7 +190,7 @@ export default function TablePages({ data }: TablePagesProps) {
     <div>
       <div className="flex items-center justify-between mb-4">
         <Input
-          placeholder="Pretraži po naslovu ili slug-u..."
+          placeholder="Pretraži po naslovu"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           className="w-96"

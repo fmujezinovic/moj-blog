@@ -1,5 +1,9 @@
 "use client";
 
+import { useState, useEffect } from "react";
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
+
 import {
   Card,
   CardHeader,
@@ -26,7 +30,6 @@ import { Switch } from "@/components/ui/switch";
 
 import { toast } from "sonner";
 import { regenerateFullPostContent } from "@/lib/gemini";
-
 import { usePostForm } from "@/hooks/usePostForm";
 import CoverImageSelector from "@/components/post/CoverImageSelector";
 import PostSectionEditor from "@/components/post/PostSectionEditor";
@@ -37,64 +40,46 @@ interface PostFormPageProps {
 
 export default function PostFormPage({ isEdit = false }: PostFormPageProps) {
   const f = usePostForm();
+  const [publishDate, setPublishDate] = useState<Date | null>(null);
 
-const handleGenerateFullPost = async () => {
-  console.log("Kliknjen gumb za generacijo!");
-  if (!f.title) {
-    toast.warning("Najprej vnesi naslov posta");
-    return;
+useEffect(() => {
+  if (f.publishDate) {
+    setPublishDate(new Date(f.publishDate));
   }
+}, [f.publishDate]);
 
-  try {
-    f.setLoading(true);
-    const sections = await regenerateFullPostContent(f.title);
 
-    if (!sections || sections.length === 0) {
-      toast.error("Generacija ni uspela (prazno)");
+  const handleGenerateFullPost = async () => {
+    if (!f.title) {
+      toast.warning("Najprej vnesi naslov posta");
       return;
     }
 
-    // Če želiš, da vedno začne s prazno sekcijo:
-    f.clearSections?.();
-
-    let usedSections = 0;
-
-    for (let i = 0; i < sections.length; i++) {
-      const section = sections[i];
-
-      // Če sekcija nima headinga ali contenta → preskoči
-      if (!section.title?.trim() || !section.content?.trim()) {
-        continue;
+    try {
+      f.setLoading(true);
+      const sections = await regenerateFullPostContent(f.title);
+      if (!sections.length) {
+        toast.error("Gemini ni vrnil nobene sekcije.");
+        return;
       }
 
-      let index;
-      if (usedSections === 0 && f.sections.length > 0) {
-        index = 0; // Uporabi obstoječo sekcijo
-      } else {
-        index = f.addSection(); // Doda novo sekcijo
-      }
-
-      f.updateSection(index, "heading", section.title);
-      f.updateSection(index, "content", section.content);
-      usedSections++;
-    }
-
-    // Če Gemini vrne manj kot 3 uporabne sekcije:
-    if (usedSections < 3) {
-      toast.warning(`AI je ustvaril samo ${usedSections} sekcije. Poskusi ponovno.`);
-    } else {
+      f.setSections(
+        sections.map(sec => ({
+          heading: sec.heading,
+          content: sec.content,
+          imageUrl: "",
+          uploadedImagePath: null,
+        }))
+      );
+      f.setSelectedTab("0");
       toast.success("Celoten post uspešno generiran!");
+    } catch (error) {
+      console.error(error);
+      toast.error("Napaka pri generiranju vsebine");
+    } finally {
+      f.setLoading(false);
     }
-  } catch (error) {
-    console.error(error);
-    toast.error("Napaka pri generiranju vsebine");
-  } finally {
-    f.setLoading(false);
-  }
-};
-
-
-
+  };
 
   return (
     <main className="flex justify-center px-4 py-10">
@@ -106,35 +91,34 @@ const handleGenerateFullPost = async () => {
               {isEdit ? "Uredi Post" : "Kreiraj Novi Post"}
             </CardTitle>
             {!isEdit && (
-            <Button
-  variant="default"
-  size="sm"
-  onClick={handleGenerateFullPost}
-  disabled={f.loading}
->
-  {f.loading ? (
-    <div className="flex items-center gap-2">
-      <div className="h-4 w-4 animate-spin rounded-full border-2 border-t-transparent border-white" />
-      Generiram...
-    </div>
-  ) : (
-    "Generiraj celoten post"
-  )}
-</Button>
-
+              <Button
+                variant="default"
+                size="sm"
+                onClick={handleGenerateFullPost}
+                disabled={f.loading}
+              >
+                {f.loading ? (
+                  <div className="flex items-center gap-2">
+                    <div className="h-4 w-4 animate-spin rounded-full border-2 border-t-transparent border-white" />
+                    Generiram...
+                  </div>
+                ) : (
+                  "Generiraj celoten post"
+                )}
+              </Button>
             )}
           </div>
 
           {/* FORM GRID */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="flex flex-wrap items-end gap-6">
             {/* Kategorija */}
-            <div className="flex flex-col gap-2">
+            <div className="flex flex-col gap-2 w-64">
               <Label className="text-md font-semibold">Kategorija</Label>
               <Select value={f.categoryId} onValueChange={f.setCategoryId}>
                 <SelectTrigger className="w-full">
                   <SelectValue placeholder="Izberi kategoriju" />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="bg-white">
                   {f.categories.map((c) => (
                     <SelectItem key={c.id} value={c.id}>
                       {c.name}
@@ -145,10 +129,8 @@ const handleGenerateFullPost = async () => {
             </div>
 
             {/* Objavljen */}
-            <div className="flex flex-col gap-2">
-              <Label htmlFor="published-switch" className="text-md font-semibold">
-                Objavljen
-              </Label>
+            <div className="flex flex-col gap-6 w-40">
+              <Label className="text-md font-semibold">Objavljen</Label>
               <Switch
                 checked={f.published}
                 onCheckedChange={f.setPublished}
@@ -156,17 +138,40 @@ const handleGenerateFullPost = async () => {
               />
             </div>
 
-            {/* Naslov */}
-            <div className="flex flex-col gap-2">
-              <Label className="text-md font-semibold">Naslov</Label>
-              <Input
-                value={f.title}
-                onChange={(e) => f.setTitle(e.target.value)}
-                placeholder="Unesi naslov posta"
+            {/* Datum i ura objave */}
+            <div className="flex flex-col gap-2 w-64">
+              <Label htmlFor="published-date" className="text-md font-semibold">
+                Datum i ura objave
+              </Label>
+              <DatePicker
+                id="published-date"
+                selected={publishDate}
+                onChange={(date) => {
+                  setPublishDate(date);
+                  if (date) f.setPublishDate(date.toISOString());
+                }}
+                showTimeSelect
+                timeFormat="HH:mm"
+                timeIntervals={15}
+                dateFormat="dd.MM.yyyy HH:mm"
+                placeholderText="Izberi datum in uro objave"
+                className="border rounded-md px-3 py-2 text-sm text-muted-foreground"
               />
             </div>
+          </div>
 
-            {/* Naslovna slika */}
+          {/* Naslov */}
+          <div className="mt-6 flex flex-col gap-2">
+            <Label className="text-md font-semibold">Naslov</Label>
+            <Input
+              value={f.title}
+              onChange={(e) => f.setTitle(e.target.value)}
+              placeholder="Unesi naslov posta"
+            />
+          </div>
+
+          {/* Naslovna slika */}
+          <div className="mt-6">
             <CoverImageSelector
               current={f.images[0]}
               onSelect={f.setCoverImage}

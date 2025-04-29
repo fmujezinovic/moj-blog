@@ -45,7 +45,7 @@ export default function CreateOrEditPostPage() {
                 <SelectTrigger className="w-full">
                   <SelectValue placeholder="Izberi kategoriju" />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="bg-white">
                   {f.categories.map(c => (
                     <SelectItem key={c.id} value={c.id}>
                       {c.name}

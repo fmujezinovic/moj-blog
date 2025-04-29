@@ -169,7 +169,7 @@ export default function TableCategories({ data }: TableCategoriesProps) {
     <div>
       <div className="flex items-center justify-between mb-4">
         <Input
-          placeholder="Pretraži po nazivu ili slug-u..."
+          placeholder="Pretraži po nazivu"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           className="w-96"

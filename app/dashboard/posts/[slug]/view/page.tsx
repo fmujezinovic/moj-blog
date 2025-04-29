@@ -4,6 +4,9 @@ import { Button } from "@/components/ui/button";
 import FancyPostLayout from "@/components/FancyPostLayout";
 import { createClient } from "@/utils/supabase/server";
 import { loadContent } from "@/lib/loadContent";
+import { toast } from "sonner";
+
+import { ViewLiveButton } from "@/components/posts/ViewLiveButton";
 
 export const dynamic = "force-dynamic"; // uvek svjež podatak
 
@@ -56,15 +59,11 @@ export default async function ViewPage({
         </div>
 
         <div className="space-x-2">
-          <Button variant="outline" asChild>
-            <a
-              href={`/${post.categories.slug}/${post.slug}`}
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              👁 View live
-            </a>
-          </Button>
+<ViewLiveButton
+  isDraft={post.is_draft}
+  url={`/${post.categories.slug}/${post.slug}`}
+/>
+
           <Button asChild>
             <a href={`/dashboard/posts/${post.slug}/edit`}>✏️ Edit</a>
           </Button>
