@@ -61,16 +61,7 @@ export default function TablePosts({ data }: { data: Post[] }) {
     is_draft: true,
   });
 
-  function handleEdit(post: Post) {
-    setEditData(post);
-    setForm({
-      title: post.title,
-      slug: post.slug,
-      content_md: post.content_md ?? "",
-      is_draft: post.is_draft ?? true,
-    });
-    setOpenDialog(true);
-  }
+
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
     setForm({ ...form, [e.target.name]: e.target.value });

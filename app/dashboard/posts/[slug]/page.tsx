@@ -89,7 +89,7 @@ export default function CreateOrEditPostPage() {
                 ))}
               </TabsList>
               <Button variant="outline" size="sm" onClick={f.addSection}>
-                Dodaj sekciju
+                Dodaj sekcijo
               </Button>
             </div>
 

@@ -30,29 +30,31 @@ export default function PostSectionEditor({
     typeof u === "string" ? { url: u, path: null } : u;
 
   return (
-    <div className="space-y-6 bg-muted/50 p-6 rounded-md shadow-sm">
-      {/* HEADING */}
-      <div>
-        <Label className="text-md font-semibold">Podnaslov</Label>
-        <Input
-          value={section.heading}
-          placeholder="Unesi podnaslov"
-          onChange={e => onChange(idx, "heading", e.target.value)}
-        />
+  <div className="space-y-6 bg-muted/50 p-6 rounded-md shadow-sm">
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      {/* LEVA STRAN: heading + content */}
+      <div className="flex flex-col gap-4">
+        <div>
+          <Label className="text-md font-semibold">Podnaslov</Label>
+          <Input
+            value={section.heading}
+            placeholder="Unesi podnaslov"
+            onChange={e => onChange(idx, "heading", e.target.value)}
+          />
+        </div>
+
+        <div>
+          <Label className="text-md font-semibold">Vsebina</Label>
+          <Textarea
+            rows={8}
+            value={section.content}
+            placeholder="Unesi vsebinu sekcije"
+            onChange={e => onChange(idx, "content", e.target.value)}
+          />
+        </div>
       </div>
 
-      {/* CONTENT */}
-      <div className="flex flex-col gap-2">
-        <Label className="text-md font-semibold">Vsebina</Label>
-        <Textarea
-          rows={8}
-          value={section.content}
-          placeholder="Unesi vsebinu sekcije"
-          onChange={e => onChange(idx, "content", e.target.value)}
-        />
-      </div>
-
-      {/* IMAGE */}
+      {/* DESNA STRAN: slika + gumbi */}
       <div className="flex flex-col gap-4">
         <Label className="text-md font-semibold">Slika sekcije</Label>
 
@@ -67,25 +69,27 @@ export default function PostSectionEditor({
           <SelectPexelsImageDialog  onSelect={u => onImage(idx, wrap(u))} />
         </div>
       </div>
-
-      {/* ACTIONS */}
-      <div className="flex justify-end gap-4 mt-4">
-        <SectionRegenerator
-          sectionTitle={section.heading}
-          onRegenerate={c => onChange(idx, "content", c)}
-        />
-        <Button
-          type="button"
-          variant="outline"
-          size="sm"
-          className="text-red-600 hover:bg-red-50" /* crveni tekst */
-          onClick={() => onDelete(idx)}
-        >
-          Izbriši sekciju
-        </Button>
-      </div>
     </div>
-  );
+
+    {/* ACTIONS */}
+    <div className="flex justify-end gap-4 mt-4">
+      <SectionRegenerator
+        sectionTitle={section.heading}
+        onRegenerate={c => onChange(idx, "content", c)}
+      />
+      <Button
+        type="button"
+        variant="outline"
+        size="sm"
+        className="text-red-600 hover:bg-red-50"
+        onClick={() => onDelete(idx)}
+      >
+        Izbriši sekciju
+      </Button>
+    </div>
+  </div>
+);
+
 }
 
 //najbolja koda

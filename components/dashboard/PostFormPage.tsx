@@ -24,53 +24,63 @@ export default function PostFormPage() {
     <main className="flex justify-center px-4 py-10">
       <Card className="w-full max-w-6xl p-8">
         {/* ---------- HEADER ---------- */}
-        <CardHeader className="space-y-6">
-          <CardTitle className="text-3xl font-bold">
-            {f.isEdit ? "Uredi Post" : "Kreiraj Novi Post"}
-          </CardTitle>
+<CardHeader className="space-y-6 border border-[hsl(var(--card-border))] shadow-sm rounded-xl p-6">
+  <CardTitle className="text-3xl font-bold">
+    {f.isEdit ? "Uredi Post" : "Kreiraj Novi Post"}
+  </CardTitle>
 
-          {/* TITLE + CATEGORY */}
-          <div className="flex flex-col md:flex-row gap-6">
-            <div className="flex-1 flex flex-col gap-2">
-              <Label className="text-md font-semibold">Naslov</Label>
-              <Input
-                value={f.title}
-                onChange={e => f.setTitle(e.target.value)}
-                placeholder="Unesi naslov posta"
-              />
-            </div>
-            <div className="flex-1 flex flex-col gap-2">
-              <Label className="text-md font-semibold">Kategorija</Label>
-              <Select value={f.categoryId} onValueChange={f.setCategoryId}>
-                <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Izberi kategoriju" />
-                </SelectTrigger>
-                <SelectContent>
-                  {f.categories.map(c => (
-                    <SelectItem key={c.id} value={c.id}>
-                      {c.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
+  {/* Kategorija + Objavljen switch v eni vrstici */}
+  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-end">
+    {/* Kategorija */}
+    <div className="flex flex-col gap-2">
+      <Label className="text-md font-semibold">Kategorija</Label>
+      <Select value={f.categoryId} onValueChange={f.setCategoryId}>
+        <SelectTrigger className="w-full">
+          <SelectValue placeholder="Izberi kategoriju" />
+        </SelectTrigger>
+        <SelectContent>
+          {f.categories.map(c => (
+            <SelectItem key={c.id} value={c.id}>
+              {c.name}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+    </div>
 
-          {/* COVER */}
-          <CoverImageSelector current={f.images[0]} onSelect={f.setCoverImage} />
+    {/* Objavljen switch */}
+    <div className="flex items-center gap-3 pt-6">
+      <Switch
+        checked={f.published}
+        onCheckedChange={f.setPublished}
+        id="published-switch"
+      />
+      <Label htmlFor="published-switch" className="text-md font-semibold">
+        Objavljen
+      </Label>
+    </div>
+  </div>
 
-          {/* PUBLISHED */}
-          <div className="flex items-center gap-3 mt-6">
-            <Switch
-              checked={f.published}
-              onCheckedChange={f.setPublished}
-              id="published-switch"
-            />
-            <Label htmlFor="published-switch" className="text-md font-semibold">
-              Objavljen
-            </Label>
-          </div>
-        </CardHeader>
+  {/* Naslov + Naslovna slika v eni vrstici */}
+  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
+    {/* Naslov */}
+    <div className="flex flex-col gap-2">
+      <Label className="text-md font-semibold">Naslov</Label>
+      <Input
+        value={f.title}
+        onChange={e => f.setTitle(e.target.value)}
+        placeholder="Unesi naslov posta"
+      />
+    </div>
+
+    {/* Naslovna slika */}
+    <CoverImageSelector current={f.images[0]} onSelect={f.setCoverImage} />
+  </div>
+
+
+</CardHeader>
+
+
 
         {/* ---------- CONTENT ---------- */}
         <CardContent className="flex flex-col gap-8">
@@ -89,7 +99,7 @@ export default function PostFormPage() {
                 ))}
               </TabsList>
               <Button variant="outline" size="sm" onClick={f.addSection}>
-                Dodaj sekciju
+                Dodaj sekcijo
               </Button>
             </div>
 
