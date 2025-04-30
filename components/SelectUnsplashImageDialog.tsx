@@ -34,8 +34,12 @@ export function SelectUnsplashImageDialog({ onSelect }: SelectImageDialogProps) 
   };
 
   /* Klik na thumbnail = odabir slike */
-  const handleSelect = (url: string) => {
-    onSelect(url);    // parent komponenta će ga pretvoriti u {url, path:null}
+  const handleImageSelect = (image: any) => {
+    onSelect({
+      url: image.full, // Using full quality image for final selection
+      alt: image.alt,
+      preview: image.regular, // Using regular quality for preview
+    });
     setOpen(false);
   };
 
@@ -70,14 +74,18 @@ export function SelectUnsplashImageDialog({ onSelect }: SelectImageDialogProps) 
 
         {/* Rezultati */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 max-h-[400px] overflow-y-auto mt-4">
-          {images.map(url => (
-            <img
-              key={url}
-              src={url}
-              alt="Unsplash slika"
-              className="rounded-lg cursor-pointer hover:scale-105 transition-transform duration-300"
-              onClick={() => handleSelect(url)}
-            />
+          {images.map((image: any, i: number) => (
+            <div
+              key={i}
+              className="relative cursor-pointer group"
+              onClick={() => handleImageSelect(image)}
+            >
+              <img
+                src={image.small}
+                alt={image.alt}
+                className="w-full h-48 object-cover rounded-lg transition-all duration-200 group-hover:opacity-75"
+              />
+            </div>
           ))}
         </div>
       </DialogContent>
