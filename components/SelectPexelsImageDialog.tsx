@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, ChangeEvent, KeyboardEvent } from "react";
 import { Dialog, DialogContent, DialogTrigger, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -9,10 +9,16 @@ interface SelectImageDialogProps {
   onSelect: (url: string) => void;
 }
 
+interface PexelsImage {
+  preview: string;
+  full: string;
+  thumbnail: string;
+}
+
 export function SelectPexelsImageDialog({ onSelect }: SelectImageDialogProps) {
   const [open, setOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-  const [images, setImages] = useState<string[]>([]);
+  const [images, setImages] = useState<PexelsImage[]>([]);
   const [loading, setLoading] = useState(false);
 
   const handleSearch = async () => {
@@ -29,8 +35,8 @@ export function SelectPexelsImageDialog({ onSelect }: SelectImageDialogProps) {
     }
   };
 
-  const handleSelect = (url: string) => {
-    onSelect(url);
+  const handleSelect = (image: PexelsImage) => {
+    onSelect(image.full);
     setOpen(false);
   };
 
@@ -51,8 +57,8 @@ export function SelectPexelsImageDialog({ onSelect }: SelectImageDialogProps) {
           <Input
             placeholder="Iskanje slik (npr. AI, narava, mesto...)"
             value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            onKeyDown={(e) => {
+            onChange={(e: ChangeEvent<HTMLInputElement>) => setSearchQuery(e.target.value)}
+            onKeyDown={(e: KeyboardEvent<HTMLInputElement>) => {
               if (e.key === "Enter") {
                 e.preventDefault();
                 handleSearch();
@@ -65,14 +71,18 @@ export function SelectPexelsImageDialog({ onSelect }: SelectImageDialogProps) {
         </div>
 
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 max-h-[400px] overflow-y-auto mt-4">
-          {images.map((url) => (
-            <img
-              key={url}
-              src={url}
-              alt="Pexels slika"
-              onClick={() => handleSelect(url)}
-              className="rounded-lg cursor-pointer hover:scale-105 transition-transform duration-300"
-            />
+          {images.map((image: PexelsImage, index: number) => (
+            <div
+              key={index}
+              className="relative cursor-pointer group"
+              onClick={() => handleSelect(image)}
+            >
+              <img
+                src={image.preview}
+                alt="Pexels slika"
+                className="w-full h-48 object-cover rounded-lg transition-all duration-200 group-hover:opacity-75"
+              />
+            </div>
           ))}
         </div>
       </DialogContent>

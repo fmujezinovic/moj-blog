@@ -11,7 +11,7 @@ export async function GET(req: NextRequest) {
   }
 
   try {
-    const res = await fetch(`https://api.pexels.com/v1/search?query=${query}&per_page=10`, {
+    const res = await fetch(`https://api.pexels.com/v1/search?query=${query}&per_page=30`, {
       headers: {
         Authorization: process.env.NEXT_PUBLIC_PEXELS_API_KEY!,
       },
@@ -24,7 +24,11 @@ export async function GET(req: NextRequest) {
     const data = await res.json();
 
     return NextResponse.json({
-      photos: (data.photos || []).map((item: any) => item.src.medium),
+      photos: (data.photos || []).map((item: any) => ({
+        preview: item.src.medium,
+        full: item.src.original,
+        thumbnail: item.src.small
+      })),
     });
   } catch (error) {
     console.error("Napaka pri pridobivanju Pexels slik:", error);

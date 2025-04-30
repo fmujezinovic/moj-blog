@@ -142,7 +142,7 @@ export const usePostForm = () => {
   /* ------------- SAVE -------------- */
   const save = async () => {
     if (!title.trim() || !categoryId) {
-      toast.error("Naslov i kategorija su obavezni");
+      toast.error("Naslov in kategorija su obavezni");
       return;
     }
     if (!description.trim()) {
@@ -166,10 +166,10 @@ export const usePostForm = () => {
         const { error } = await supabase.from("posts").update({
           title,
           description,
-          intro,       // ← shrani Uvod
+          intro,
           content_md,
-          conclusion,  // ← shrani Zaključek
-          is_draft: true,
+          conclusion,
+          is_draft: !published, // Fix: Using the published state to determine draft status
           category_id: categoryId,
           images,
           published_at: publishDate,
@@ -186,11 +186,11 @@ export const usePostForm = () => {
         const { error } = await supabase.from("posts").insert({
           title,
           description,
-          intro,       // ← shrani Uvod
+          intro,
           content_md,
-          conclusion,  // ← shrani Zaključek
+          conclusion,
           slug: newSlug,
-          is_draft: true,
+          is_draft: !published, // Fix: Using the published state here as well
           category_id: categoryId,
           images,
           published_at: publishDate,
