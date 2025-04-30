@@ -1,3 +1,5 @@
+// app/blog/[category]/[slug]/page.tsx
+
 import { getPostViewerData } from "@/lib/getPostViewerData.server";
 import FancyPostLayout from "@/components/FancyPostLayout";
 import { Metadata } from "next";
@@ -58,10 +60,13 @@ export default async function PostPage({ params }: { params: { category: string;
     <main className="flex flex-col bg-background text-foreground min-h-screen px-4 py-10 max-w-4xl mx-auto">
       <FancyPostLayout
         title={post.title}
+        intro={post.intro}
         content={<MDXContent />}
+        conclusion={post.conclusion}
         images={post.images || []}
-        prevSlug={prev ? `/blog/${params.category}/${prev}` : null}
-        nextSlug={next ? `/blog/${params.category}/${next}` : null}
+        prev={prev ? `/blog/${params.category}/${prev}` : null}
+        next={next ? `/blog/${params.category}/${next}` : null}
+        category={params.category}
       />
     </main>
   );

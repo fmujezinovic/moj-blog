@@ -9,7 +9,6 @@ export async function regenerateFullPostContent(
   title: string,
   note?: string
 ) {
-  // zdaj let namesto const
   let prompt = `
 Napiši članek na temo "${title}", pri čemer upoštevaj naslednja pravila:
 
