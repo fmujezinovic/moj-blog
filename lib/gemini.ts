@@ -24,7 +24,7 @@ Napiši članek na temo "${title}", pri čemer upoštevaj naslednja pravila:
    - Če je tema zelo kompleksna, lahko dodaš še eno sekcijo “Dodatni nasveti” ali “Pogosta vprašanja”.
    - Vsaka H2 naj vsebuje ključno besedo.
    - Za podsekcije uporabi H3 (\`###\`).
-   - Vsaka sekcija naj šteje vsaj **200 besed**.
+   - Vsaka sekcija naj šteje vsaj **200 besed**. Vsebina naj bo poglobljena, informativna in uporabna ter razdeljena v manjše odstavke. Odstavki naj bodo ločeni med seboj s prazno vrstico.
 5. **Dolžina** (samo sekcije): **800–1500 besed**.
 6. **Linki**:
    - vsaj 1 notranja povezava na drug blog post,

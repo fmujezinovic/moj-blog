@@ -63,13 +63,15 @@ export async function loadContent({
       .eq("slug", slug)
       .single();
     
-  if (error) {
-  console.error("Napaka pri pridobivanju posta za slug:", slug, error?.message ?? error);
-  return null;
-}
+    if (error) {
+      console.error("Napaka pri pridobivanju posta za slug:", slug, error?.message ?? error);
+      notFound();
+    }
 
-
-
+    if (!post) {
+      console.warn("Post ni najden za slug:", slug);
+      notFound();
+    }
 
     const MDXContent = await parseMDX(post.content_md);
     return {
