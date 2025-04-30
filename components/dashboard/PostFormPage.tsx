@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useTransition } from "react";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 
@@ -31,7 +31,10 @@ import {
 import { Switch } from "@/components/ui/switch";
 
 import { toast } from "sonner";
-import { regenerateFullPostContent } from "@/lib/gemini";
+import {
+  regenerateFullPostContent,
+  generateMetaDescription,
+} from "@/lib/gemini";
 import { usePostForm } from "@/hooks/usePostForm";
 import CoverImageSelector from "@/components/post/CoverImageSelector";
 import PostSectionEditor from "@/components/post/PostSectionEditor";
@@ -43,44 +46,77 @@ interface PostFormPageProps {
 export default function PostFormPage({ isEdit = false }: PostFormPageProps) {
   const f = usePostForm();
   const [publishDate, setPublishDate] = useState<Date | null>(null);
+  const [isPendingDesc, startDesc] = useTransition();
+  const [isPendingFull, startFull] = useTransition();
 
-useEffect(() => {
-  if (f.publishDate) {
-    setPublishDate(new Date(f.publishDate));
-  }
-}, [f.publishDate]);
+  useEffect(() => {
+    if (f.publishDate) {
+      setPublishDate(new Date(f.publishDate));
+    }
+  }, [f.publishDate]);
 
-
-  const handleGenerateFullPost = async () => {
-    if (!f.title) {
+  const handleGenerateFullPost = () => {
+    if (!f.title.trim()) {
       toast.warning("Najprej vnesi naslov posta");
       return;
     }
 
-    try {
-      f.setLoading(true);
-      const sections = await regenerateFullPostContent(f.title);
-      if (!sections.length) {
-        toast.error("Gemini ni vrnil nobene sekcije.");
-        return;
-      }
+    startFull(async () => {
+      try {
+        f.setLoading(true);
+        const sections = await regenerateFullPostContent(f.title);
+        if (!sections.length) {
+          toast.error("Gemini ni vrnil nobene sekcije.");
+          return;
+        }
 
-      f.setSections(
-        sections.map(sec => ({
-          heading: sec.heading,
-          content: sec.content,
-          imageUrl: "",
-          uploadedImagePath: null,
-        }))
-      );
-      f.setSelectedTab("0");
-      toast.success("Celoten post uspešno generiran!");
-    } catch (error) {
-      console.error(error);
-      toast.error("Napaka pri generiranju vsebine");
-    } finally {
-      f.setLoading(false);
+        f.setSections(
+          sections.map((sec) => ({
+            heading: sec.heading,
+            content: sec.content,
+            imageUrl: "",
+            uploadedImagePath: null,
+          }))
+        );
+        f.setSelectedTab("0");
+
+        // Generiraj tudi meta opis
+        const markdown = sections
+          .map((s) => `## ${s.heading}\n${s.content}`)
+          .join("\n\n");
+        const desc = await generateMetaDescription(f.title, markdown);
+        f.setDescription(desc);
+
+        toast.success("Celoten post in meta opis uspešno ustvarjena!");
+      } catch (error) {
+        console.error(error);
+        toast.error("Napaka pri generiranju vsebine");
+      } finally {
+        f.setLoading(false);
+      }
+    });
+  };
+
+  // AI-generate meta description (posamično)
+  const handleGenerateDescription = () => {
+    if (!f.title.trim()) {
+      toast.warning("Najprej vnesi naslov posta");
+      return;
     }
+    startDesc(async () => {
+      try {
+        const markdown = f.sections
+          .map((s) => `## ${s.heading}\n${s.content}`)
+          .join("\n\n");
+
+        const desc = await generateMetaDescription(f.title, markdown);
+        f.setDescription(desc);
+        toast.success("Meta opis ustvarjen!");
+      } catch (e) {
+        console.error(e);
+        toast.error("Napaka pri generiranju opisa");
+      }
+    });
   };
 
   return (
@@ -97,9 +133,9 @@ useEffect(() => {
                 variant="default"
                 size="sm"
                 onClick={handleGenerateFullPost}
-                disabled={f.loading}
+                disabled={f.loading || isPendingFull}
               >
-                {f.loading ? (
+                {f.loading || isPendingFull ? (
                   <div className="flex items-center gap-2">
                     <div className="h-4 w-4 animate-spin rounded-full border-2 border-t-transparent border-white" />
                     Generiram...
@@ -170,34 +206,47 @@ useEffect(() => {
               onChange={(e) => f.setTitle(e.target.value)}
               placeholder="Unesi naslov posta"
             />
-                  </div>
-                  
-{/* Opis (description) z omejitvijo in števcem */}
-<div className="mt-6 flex flex-col gap-2">
-  <Label className="text-md font-semibold" htmlFor="description">
-    Opis (meta description)
-  </Label>
-  <Textarea
-    id="description"
-    value={f.description}
-    onChange={(e) => f.setDescription(e.target.value)}
-    placeholder="Kratek opis za SEO (priporočeno do 160 znakov)"
-    rows={3}
-    className={f.description.length > 160 || !f.description.trim() ? "border-red-500" : ""}
-  />
-  <div className="text-sm text-muted-foreground text-right">
-    <span className={
-      f.description.length > 160 || !f.description.trim()
-        ? "text-red-500 font-medium"
-        : ""
-    }>
-      {f.description.length} / 160
-    </span>
-  </div>
-</div>
+          </div>
 
-
-
+          {/* Opis (description) z omejitvijo in števcem + AI gumb */}
+          <div className="mt-6 flex flex-col gap-2">
+            <Label className="text-md font-semibold" htmlFor="description">
+              Opis (meta description)
+            </Label>
+            <div className="flex gap-2">
+              <Textarea
+                id="description"
+                value={f.description}
+                onChange={(e) => f.setDescription(e.target.value)}
+                placeholder="Kratek opis za SEO (priporočeno do 160 znakov)"
+                rows={3}
+                className={
+                  f.description.length > 160 || !f.description.trim()
+                    ? "border-red-500"
+                    : ""
+                }
+              />
+              <Button
+                type="button"
+                size="sm"
+                onClick={handleGenerateDescription}
+                disabled={isPendingDesc}
+              >
+                {isPendingDesc ? "Generiram…" : "AI napiši opis"}
+              </Button>
+            </div>
+            <div className="text-sm text-muted-foreground text-right">
+              <span
+                className={
+                  f.description.length > 160 || !f.description.trim()
+                    ? "text-red-500 font-medium"
+                    : ""
+                }
+              >
+                {f.description.length} / 160
+              </span>
+            </div>
+          </div>
 
           {/* Naslovna slika */}
           <div className="mt-6">
