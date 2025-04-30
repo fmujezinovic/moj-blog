@@ -1,11 +1,12 @@
 // ✅ Strežniška komponenta (ni "use client")
-import { loadContentList } from "@/lib/loadContent";
+
 import Link from "next/link";
 import Image from "next/image";
 
 export const dynamic = "force-dynamic";
 
 export default async function CategoryPage({ params }: { params: { category: string } }) {
+  const { loadContentList } = await import("@/lib/loadContent.server");
   const { category } = params;
 
   const { data: posts } = await loadContentList({

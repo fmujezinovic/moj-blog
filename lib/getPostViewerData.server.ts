@@ -1,8 +1,9 @@
 // lib/getPostViewerData.ts
-import { loadContent } from "@/lib/loadContent";
+
 import { createClient } from "@/utils/supabase/client";
 
 export async function getPostViewerData(slug: string) {
+  const { loadContent } = await import("@/lib/loadContent.server");
   const supabase = createClient();
 
   const result = await loadContent({

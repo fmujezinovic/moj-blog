@@ -1,4 +1,4 @@
-import { loadContent } from "@/lib/loadContent";
+
 import FancyPageLayout from "@/components/FancyPageLayout";
 import { Suspense } from "react";
 import { Metadata } from "next";
@@ -15,6 +15,7 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 async function LoadContent() {
+  const { loadContentList } = await import("@/lib/loadContent.server");
   const { MDXContent } = await loadContent({ table: "pages", slug: "o-meni" });
 
   return (

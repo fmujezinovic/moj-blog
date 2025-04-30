@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import FancyPostLayout from "@/components/FancyPostLayout";
 import { createClient } from "@/utils/supabase/server";
-import { loadContent } from "@/lib/loadContent";
+
 import { toast } from "sonner";
 
 import { ViewLiveButton } from "@/components/posts/ViewLiveButton";
@@ -14,7 +14,8 @@ export default async function ViewPage({
   params,
 }: {
   params: { slug: string };
-}) {
+    }) {
+    const { loadContentList } = await import("@/lib/loadContent.server");
   const supabase = await createClient();
 
   /* ----- 1. Dohvati sam post -------------- */

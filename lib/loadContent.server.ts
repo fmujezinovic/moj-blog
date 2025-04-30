@@ -100,7 +100,7 @@ return {
   data: { ...page, images: [] }, // pages nimajo images
   MDXContent,
 };
-
+}  // Added missing closing brace for loadContent
 
 /* ------------------------------------------------------------------ */
 /*                         SEZNAM OBJAV (posts)                       */
@@ -127,7 +127,7 @@ export async function loadContentList({
 
     const { data: posts, error: postsErr } = await supabase
       .from("posts")
-      .select("id, title, slug, published_at, images") // ✅ DODALI "images"
+      .select("id, title, slug, published_at, images")
       .eq("category_id", cat.id)
       .eq("is_draft", false)
       .order("published_at", { ascending: false });

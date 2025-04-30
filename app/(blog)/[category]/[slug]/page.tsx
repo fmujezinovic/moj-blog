@@ -1,4 +1,4 @@
-import { getPostViewerData } from "@/lib/getPostViewerData";
+import { getPostViewerData } from "@/lib/getPostViewerData.server";
 import FancyPostLayout from "@/components/FancyPostLayout";
 import { Metadata } from "next";
 import { notFound } from "next/navigation";
