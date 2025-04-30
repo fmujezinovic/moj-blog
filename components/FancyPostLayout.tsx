@@ -83,7 +83,7 @@ export default function FancyPostLayout({
       {sections.length > 1 && (
         <aside className="hidden lg:block w-64 sticky top-24 self-start h-screen pt-12 pr-8">
           <nav className="bg-white rounded-lg shadow-sm p-4">
-            <h3 className="font-heading text-lg mb-4">Sadržaj</h3>
+            <h3 className="font-heading text-lg mb-4">Vsebina</h3>
             <ul className="space-y-2">
               {sections.map((sec) => (
                 <li key={sec.id}>

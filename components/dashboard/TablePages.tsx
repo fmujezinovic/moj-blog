@@ -38,6 +38,8 @@ type Page = {
   title: string;
   slug: string;
   content_md: string | null;
+  description: string | null;
+  published_at: string | null;
   is_draft: boolean;
   created_at: string | null;
   updated_at: string | null;
@@ -49,6 +51,7 @@ interface TablePagesProps {
 
 export default function TablePages({ data }: TablePagesProps) {
   const supabase = createClient();
+  const router = useRouter();
 
   const [search, setSearch] = useState("");
   const [pages, setPages] = useState<Page[]>(data);
@@ -60,7 +63,9 @@ export default function TablePages({ data }: TablePagesProps) {
     title: "",
     slug: "",
     content_md: "",
+    description: "",
     is_draft: true,
+    published_at: null as string | null,
   });
 
   function handleEdit(page: Page) {
@@ -69,7 +74,9 @@ export default function TablePages({ data }: TablePagesProps) {
       title: page.title,
       slug: page.slug,
       content_md: page.content_md || "",
+      description: page.description || "",
       is_draft: page.is_draft,
+      published_at: page.published_at,
     });
     setOpenDialog(true);
   }
@@ -111,7 +118,9 @@ export default function TablePages({ data }: TablePagesProps) {
       title: "",
       slug: "",
       content_md: "",
+      description: "",
       is_draft: true,
+      published_at: null,
     });
   };
 
@@ -208,7 +217,7 @@ export default function TablePages({ data }: TablePagesProps) {
               <Input name="slug" placeholder="Slug (npr. o-meni)" value={form.slug} onChange={handleChange} />
               <textarea
                 name="content_md"
-                placeholder="Markdown sadržaj..."
+                placeholder="Markdown vsebina..."
                 value={form.content_md || ""}
                 onChange={handleChange}
                 className="border rounded p-2 h-32"
