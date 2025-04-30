@@ -7,7 +7,9 @@ import Link from "next/link";
 
 interface FancyPostLayoutProps {
   title: string;
+  intro?: string;             // ← novo
   content: ReactNode;
+  conclusion?: string;        // ← novo
   images?: string[];
   prev?: string | null;
   next?: string | null;
@@ -21,7 +23,9 @@ const fadeIn = {
 
 export default function FancyPostLayout({
   title,
+  intro,                      // ← destrukturiraš
   content,
+  conclusion,                 // ← destrukturiraš
   images = [],
   prev,
   next,
@@ -83,6 +87,19 @@ export default function FancyPostLayout({
       >
         {title}
       </motion.h1>
+
+      {/* Intro */}
+      {intro && (
+        <motion.p
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true }}
+          variants={fadeIn}
+          className="text-lg text-foreground mb-12 leading-relaxed text-justify"
+        >
+          {intro}
+        </motion.p>
+      )}
 
       {/* Sections */}
       {sections.map((section, index) => (
@@ -154,6 +171,19 @@ export default function FancyPostLayout({
           )}
         </motion.div>
       ))}
+
+      {/* Conclusion */}
+      {conclusion && (
+        <motion.p
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true }}
+          variants={fadeIn}
+          className="text-lg text-foreground mt-12 leading-relaxed text-justify"
+        >
+          {conclusion}
+        </motion.p>
+      )}
 
       {/* Navigation buttons */}
       <div className="flex justify-between pt-12 border-t border-border">

@@ -34,6 +34,7 @@ import { toast } from "sonner";
 import {
   regenerateFullPostContent,
   generateMetaDescription,
+  regenerateSectionContent,  // ← import za AI uvod/zaključek
 } from "@/lib/gemini";
 import { usePostForm } from "@/hooks/usePostForm";
 import CoverImageSelector from "@/components/post/CoverImageSelector";
@@ -48,6 +49,8 @@ export default function PostFormPage({ isEdit = false }: PostFormPageProps) {
   const [publishDate, setPublishDate] = useState<Date | null>(null);
   const [isPendingDesc, startDesc] = useTransition();
   const [isPendingFull, startFull] = useTransition();
+  const [isPendingIntro, startIntro] = useTransition();         // ← stanje za uvod
+  const [isPendingConclusion, startConclusion] = useTransition(); // ← stanje za zaključek
 
   useEffect(() => {
     if (f.publishDate) {
@@ -55,47 +58,64 @@ export default function PostFormPage({ isEdit = false }: PostFormPageProps) {
     }
   }, [f.publishDate]);
 
-  const handleGenerateFullPost = () => {
-    if (!f.title.trim()) {
-      toast.warning("Najprej vnesi naslov posta");
-      return;
-    }
+const handleGenerateFullPost = () => {
+  if (!f.title.trim()) {
+    toast.warning("Najprej vnesi naslov posta");
+    return;
+  }
 
-    startFull(async () => {
-      try {
-        f.setLoading(true);
-        const sections = await regenerateFullPostContent(f.title);
-        if (!sections.length) {
-          toast.error("Gemini ni vrnil nobene sekcije.");
-          return;
-        }
+  startFull(async () => {
+    try {
+      f.setLoading(true);
 
-        f.setSections(
-          sections.map((sec) => ({
-            heading: sec.heading,
-            content: sec.content,
-            imageUrl: "",
-            uploadedImagePath: null,
-          }))
-        );
-        f.setSelectedTab("0");
-
-        // Generiraj tudi meta opis
-        const markdown = sections
-          .map((s) => `## ${s.heading}\n${s.content}`)
-          .join("\n\n");
-        const desc = await generateMetaDescription(f.title, markdown);
-        f.setDescription(desc);
-
-        toast.success("Celoten post in meta opis uspešno ustvarjena!");
-      } catch (error) {
-        console.error(error);
-        toast.error("Napaka pri generiranju vsebine");
-      } finally {
-        f.setLoading(false);
+      // 1) sekcije
+      const sections = await regenerateFullPostContent(f.title);
+      if (!sections.length) {
+        toast.error("Gemini ni vrnil nobene sekcije.");
+        return;
       }
-    });
-  };
+      f.setSections(
+        sections.map((sec) => ({
+          heading: sec.heading,
+          content: sec.content,
+          imageUrl: "",
+          uploadedImagePath: null,
+        }))
+      );
+      f.setSelectedTab("0");
+
+      // 2) meta opis
+      const markdown = sections
+        .map((s) => `## ${s.heading}\n${s.content}`)
+        .join("\n\n");
+      const desc = await generateMetaDescription(f.title, markdown);
+      f.setDescription(desc);
+
+      // 3) uvod
+      const intro = await regenerateSectionContent(
+        "Uvod",
+        `Na osnovi naslova "${f.title}" in naslednjih sekcij:\n\n${markdown}`
+      );
+      f.setIntro(intro.trim());
+
+      // 4) zaključek
+      const conclusion = await regenerateSectionContent(
+        "Zaključek",
+        `Na osnovi naslova "${f.title}" in naslednjih sekcij:\n\n${markdown}`
+      );
+      f.setConclusion(conclusion.trim());
+
+      toast.success("Celoten post, meta opis, uvod in zaključek uspešno ustvarjeni!");
+    } catch (error) {
+      console.error(error);
+      toast.error("Napaka pri generiranju vsebine");
+    } finally {
+      f.setLoading(false);
+    }
+  });
+};
+
+
 
   // AI-generate meta description (posamično)
   const handleGenerateDescription = () => {
@@ -115,6 +135,56 @@ export default function PostFormPage({ isEdit = false }: PostFormPageProps) {
       } catch (e) {
         console.error(e);
         toast.error("Napaka pri generiranju opisa");
+      }
+    });
+  };
+
+  // AI-generate uvod
+  const handleGenerateIntro = () => {
+    if (!f.title.trim()) {
+      toast.warning("Najprej vnesi naslov posta");
+      return;
+    }
+    startIntro(async () => {
+      try {
+        const markdown = f.sections
+          .map((s) => `## ${s.heading}\n${s.content}`)
+          .join("\n\n");
+
+        const intro = await regenerateSectionContent(
+          "Uvod",
+          `Na osnovi naslova "${f.title}" in naslednjih sekcij:\n\n${markdown}`
+        );
+        f.setIntro(intro.trim());
+        toast.success("Uvod ustvarjen!");
+      } catch (e) {
+        console.error(e);
+        toast.error("Napaka pri generiranju uvoda");
+      }
+    });
+  };
+
+  // AI-generate zaključek
+  const handleGenerateConclusion = () => {
+    if (!f.title.trim()) {
+      toast.warning("Najprej vnesi naslov posta");
+      return;
+    }
+    startConclusion(async () => {
+      try {
+        const markdown = f.sections
+          .map((s) => `## ${s.heading}\n${s.content}`)
+          .join("\n\n");
+
+        const conclusion = await regenerateSectionContent(
+          "Zaključek",
+          `Na osnovi naslova "${f.title}" in naslednjih sekcij:\n\n${markdown}`
+        );
+        f.setConclusion(conclusion.trim());
+        toast.success("Zaključek ustvarjen!");
+      } catch (e) {
+        console.error(e);
+        toast.error("Napaka pri generiranju zaključka");
       }
     });
   };
@@ -259,6 +329,30 @@ export default function PostFormPage({ isEdit = false }: PostFormPageProps) {
 
         {/* ---------- CONTENT ---------- */}
         <CardContent className="flex flex-col gap-8">
+          {/* Uvod */}
+          <div className="mt-6 flex flex-col gap-2">
+            <Label htmlFor="intro" className="text-md font-semibold">
+              Uvod
+            </Label>
+            <div className="flex gap-2">
+              <Textarea
+                id="intro"
+                value={f.intro}
+                onChange={(e) => f.setIntro(e.target.value)}
+                placeholder="Napiši uvod, ki bo pred sekcijami"
+                rows={4}
+              />
+              <Button
+                type="button"
+                size="sm"
+                onClick={handleGenerateIntro}
+                disabled={isPendingIntro}
+              >
+                {isPendingIntro ? "Generiram…" : "AI napiši uvod"}
+              </Button>
+            </div>
+          </div>
+
           <Tabs value={f.selectedTab} onValueChange={f.setSelectedTab}>
             {/* Tab triggers */}
             <div className="flex items-center justify-between mb-6">
@@ -291,6 +385,30 @@ export default function PostFormPage({ isEdit = false }: PostFormPageProps) {
               </TabsContent>
             ))}
           </Tabs>
+
+          {/* Zaključek */}
+          <div className="mt-6 flex flex-col gap-2">
+            <Label htmlFor="conclusion" className="text-md font-semibold">
+              Zaključek
+            </Label>
+            <div className="flex gap-2">
+              <Textarea
+                id="conclusion"
+                value={f.conclusion}
+                onChange={(e) => f.setConclusion(e.target.value)}
+                placeholder="Napiši zaključek, ki bo po sekcijah"
+                rows={4}
+              />
+              <Button
+                type="button"
+                size="sm"
+                onClick={handleGenerateConclusion}
+                disabled={isPendingConclusion}
+              >
+                {isPendingConclusion ? "Generiram…" : "AI napiši zaključek"}
+              </Button>
+            </div>
+          </div>
 
           {/* SAVE / CANCEL */}
           <div className="flex justify-end gap-4">
