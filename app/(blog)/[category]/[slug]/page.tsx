@@ -1,30 +1,23 @@
-// app/blog/[category]/[slug]/page.tsx
-
-import { loadContent } from "@/lib/loadContent";
+import { getPostViewerData } from "@/lib/getPostViewerData";
 import FancyPostLayout from "@/components/FancyPostLayout";
-import { Suspense } from "react";
 import { Metadata } from "next";
+import { notFound } from "next/navigation";
 
-const baseUrl = "https://farismujezinovic.si"; // 🔥 Dodaj ovde!
+const baseUrl = "https://farismujezinovic.si";
 
 export const dynamic = "force-dynamic";
 
-// 🔽 OVA FUNKCIJA IDE OVDE
 export async function generateMetadata({ params }: { params: { category: string; slug: string } }): Promise<Metadata> {
-  const { data: post } = await loadContent({
-    table: "posts",
-    slug: params.slug,
-    categorySlug: params.category,
-  });
+  const result = await getPostViewerData(params.slug);
 
-  if (!post) {
+  if (!result) {
     return {
       title: "Objava ni najdena",
       description: "Stran, ki ste jo iskali, ne obstaja.",
     };
   }
 
-  const baseUrl = "https://farismujezinovic.si"; // <- zamijeni s pravom domenom
+  const { post } = result;
 
   return {
     title: post.title || "Objava",
@@ -55,56 +48,21 @@ export async function generateMetadata({ params }: { params: { category: string;
   };
 }
 
-// 🔽 Tvoja stranica
 export default async function PostPage({ params }: { params: { category: string; slug: string } }) {
-  const { data: post, MDXContent } = await loadContent({
-    table: "posts",
-    slug: params.slug,
-    categorySlug: params.category,
-  });
+  const result = await getPostViewerData(params.slug);
+  if (!result) return notFound();
+
+  const { post, MDXContent, prev, next } = result;
 
   return (
-    <main className="flex flex-col bg-background text-foreground min-h-screen">
-      <Suspense fallback={<div className="text-center py-20 font-subheading text-base">Nalagam objavo...</div>}>
-        <FancyPostLayout
-          title={post.title}
-          content={<MDXContent />}
-          images={post.images || []}
-        />
-      </Suspense>
-
-
-    {/* Dodajemo structured data */}
-    <script
-      type="application/ld+json"
-      dangerouslySetInnerHTML={{
-        __html: JSON.stringify({
-          "@context": "https://schema.org",
-          "@type": "BlogPosting",
-          headline: post.title,
-          description: post.description?.slice(0, 160) || "",
-          image: post.ogImage || `${baseUrl}/default-og.png`,
-          datePublished: post.published_at || new Date().toISOString(),
-          dateModified: post.updated_at || post.published_at || new Date().toISOString(),
-          author: {
-            "@type": "Person",
-            name: "Faris Mujezinović", // tvoj ime kao autor
-          },
-          publisher: {
-            "@type": "Organization",
-            name: "Faris Mujezinović",
-            logo: {
-              "@type": "ImageObject",
-              url: `${baseUrl}/logo.png`, // Ako imaš logo, ovde ga stavi (ili promijeni putanju)
-            },
-          },
-          mainEntityOfPage: {
-            "@type": "WebPage",
-            "@id": `${baseUrl}/blog/${params.category}/${params.slug}`,
-          },
-        }),
-      }}
-    />
+    <main className="flex flex-col bg-background text-foreground min-h-screen px-4 py-10 max-w-4xl mx-auto">
+      <FancyPostLayout
+        title={post.title}
+        content={<MDXContent />}
+        images={post.images || []}
+        prevSlug={prev ? `/blog/${params.category}/${prev}` : null}
+        nextSlug={next ? `/blog/${params.category}/${next}` : null}
+      />
     </main>
   );
 }

@@ -4,6 +4,8 @@ import { useState, useEffect } from "react";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 
+import { Textarea } from "@/components/ui/textarea";
+
 import {
   Card,
   CardHeader,
@@ -168,7 +170,34 @@ useEffect(() => {
               onChange={(e) => f.setTitle(e.target.value)}
               placeholder="Unesi naslov posta"
             />
-          </div>
+                  </div>
+                  
+{/* Opis (description) z omejitvijo in števcem */}
+<div className="mt-6 flex flex-col gap-2">
+  <Label className="text-md font-semibold" htmlFor="description">
+    Opis (meta description)
+  </Label>
+  <Textarea
+    id="description"
+    value={f.description}
+    onChange={(e) => f.setDescription(e.target.value)}
+    placeholder="Kratek opis za SEO (priporočeno do 160 znakov)"
+    rows={3}
+    className={f.description.length > 160 || !f.description.trim() ? "border-red-500" : ""}
+  />
+  <div className="text-sm text-muted-foreground text-right">
+    <span className={
+      f.description.length > 160 || !f.description.trim()
+        ? "text-red-500 font-medium"
+        : ""
+    }>
+      {f.description.length} / 160
+    </span>
+  </div>
+</div>
+
+
+
 
           {/* Naslovna slika */}
           <div className="mt-6">

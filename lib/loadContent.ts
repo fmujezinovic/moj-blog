@@ -62,10 +62,14 @@ export async function loadContent({
       .select("*, categories ( slug )")
       .eq("slug", slug)
       .single();
-    if (error || !post) {
-      console.error(error);
-      notFound();
-    }
+    
+  if (error) {
+  console.error("Napaka pri pridobivanju posta za slug:", slug, error?.message ?? error);
+  return null;
+}
+
+
+
 
     const MDXContent = await parseMDX(post.content_md);
     return {
@@ -75,23 +79,28 @@ export async function loadContent({
   }
 
   /* ----------------------------- PAGE ------------------------------- */
-  const { data: page, error: pageErr } = await supabase
-    .from("pages")
-    .select("*")
-    .eq("slug", slug)
-    .eq("is_draft", false)
-    .single();
-  if (pageErr || !page) {
-    console.error(pageErr);
-    notFound();
-  }
+const { data: page, error: pageErr } = await supabase
+  .from("pages")
+  .select("*")
+  .eq("slug", slug)
+  .eq("is_draft", false)
+  .single();
 
-  const MDXContent = await parseMDX(page.content_md);
-  return {
-    data: { ...page, images: [] }, // pages nimajo images
-    MDXContent,
-  };
+if (pageErr) {
+  console.error("Napaka v Supabase poizvedbi:", pageErr.message ?? pageErr);
+  notFound();
 }
+if (!page) {
+  console.warn("Stran (page) ni najdena za slug:", slug);
+  notFound();
+}
+
+const MDXContent = await parseMDX(page.content_md);
+return {
+  data: { ...page, images: [] }, // pages nimajo images
+  MDXContent,
+};
+
 
 /* ------------------------------------------------------------------ */
 /*                         SEZNAM OBJAV (posts)                       */

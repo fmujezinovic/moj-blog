@@ -32,6 +32,8 @@ export const usePostForm = () => {
   const [loading, setLoading]         = useState(false);
   const isEdit = Boolean(slug);
   const [publishDate, setPublishDate] = useState<string | null>(null);
+  const [description, setDescription] = useState("");
+
 
 
   /* ------------- FETCHING -------------- */
@@ -71,7 +73,8 @@ if (!data) {
     setTitle(data.title);
     setPublished(!data.is_draft);
     setCategoryId(data.category_id);
-    console.log("RAW published_at:", data.published_at);
+    setDescription(data.description || "");
+
 
 setPublishDate(data.published_at ? new Date(data.published_at).toISOString() : null);
 
@@ -153,10 +156,23 @@ setPublishDate(data.published_at ? new Date(data.published_at).toISOString() : n
       toast.error("Naslov i kategorija su obavezni");
       return;
     }
+
+    if (!description.trim()) {
+  toast.error("Opis (description) je obvezen");
+  return;
+}
+
+     if (description.length > 160) {
+  toast.error("Opis (description) naj bo krajši od 160 znakov");
+       return;
+       }
+
     if (!sections.some(s => s.heading.trim() && s.content.trim())) {
       toast.error("Bar jedna sekcija mora biti popunjena");
       return;
     }
+
+
 
     setLoading(true);
     const content_md = stringifySectionsToMarkdown(sections);
@@ -164,7 +180,8 @@ setPublishDate(data.published_at ? new Date(data.published_at).toISOString() : n
     try {
       if (isEdit) {
         const { error } = await supabase.from("posts").update({
-  title,
+          title,
+          description, // ✅ DODANO
   content_md,
   is_draft: true, // ostaje true, dok cron ne aktivira
   category_id: categoryId,
@@ -183,7 +200,8 @@ setPublishDate(data.published_at ? new Date(data.published_at).toISOString() : n
   .replace(/(^-|-$)+/g, "");         // Ukloni suvišne crtice
 
         const { error } = await supabase.from("posts").insert({
-  title,
+          title,
+          description,
   slug: newSlug,
   content_md,
   is_draft: true, // uvek true
@@ -225,6 +243,8 @@ return {
   setCoverImage,
   save,
   publishDate, setPublishDate,
+   description,
+  setDescription,
 };
 
 

@@ -1,26 +1,39 @@
-'use client';
+"use client";
 
 import { ReactNode, Children, isValidElement, cloneElement } from "react";
 import { motion } from "framer-motion";
-import Image from "next/image"; // dodan import za optimizovane slike
+import Image from "next/image";
+import Link from "next/link";
 
 interface FancyPostLayoutProps {
   title: string;
   content: ReactNode;
   images?: string[];
+  prev?: string | null;
+  next?: string | null;
+  category?: string;
 }
 
-// Animacije
 const fadeIn = {
   hidden: { opacity: 0, y: 30 },
   visible: { opacity: 1, y: 0, transition: { duration: 0.7, ease: "easeOut" } },
 };
 
-export default function FancyPostLayout({ title, content, images = [] }: FancyPostLayoutProps) {
+export default function FancyPostLayout({
+  title,
+  content,
+  images = [],
+  prev,
+  next,
+  category,
+}: FancyPostLayoutProps) {
   const elements = Children.toArray(content);
 
   const sections: { heading: ReactNode; body: ReactNode[] }[] = [];
-  let currentSection: { heading: ReactNode | null; body: ReactNode[] } = { heading: null, body: [] };
+  let currentSection: { heading: ReactNode | null; body: ReactNode[] } = {
+    heading: null,
+    body: [],
+  };
 
   elements.forEach((el) => {
     if (isValidElement(el) && el.type === "h2") {
@@ -141,6 +154,26 @@ export default function FancyPostLayout({ title, content, images = [] }: FancyPo
           )}
         </motion.div>
       ))}
+
+      {/* Navigation buttons */}
+      <div className="flex justify-between pt-12 border-t border-border">
+        {prev ? (
+          <Link
+            href={`/blog/${category}/${prev}`}
+            className="text-primary font-medium hover:underline"
+          >
+            ← Prejšnja objava
+          </Link>
+        ) : <div />}
+        {next ? (
+          <Link
+            href={`/blog/${category}/${next}`}
+            className="text-primary font-medium hover:underline"
+          >
+            Naslednja objava →
+          </Link>
+        ) : <div />}
+      </div>
     </div>
   );
 }

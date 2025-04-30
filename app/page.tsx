@@ -15,7 +15,7 @@ export default async function HomePage() {
   return (
     <main className="flex flex-col bg-background text-foreground">
       {/* Hero sekcija */}
-      <h1 className="text-2xl font-bold mb-4">Test konekcije</h1>
+      
       
 
  <section className="min-h-screen flex flex-col justify-center items-center text-center px-6 py-16" style={{ backgroundColor: "#ACB0D4" }}>
