@@ -83,9 +83,11 @@ export default async function ViewPage({
           images={post.images}
           prev={prev}
           next={next}
-          category={post.categories.slug}
+                  category={post.categories.slug}
+                  slug={post.slug} 
         />
       </Suspense>
     </main>
   );
 }
+

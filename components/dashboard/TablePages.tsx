@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import * as React from "react";
+import { useRouter } from "next/navigation";
 import {
   useReactTable,
   getCoreRowModel,
@@ -8,6 +9,8 @@ import {
   ColumnDef,
   flexRender,
 } from "@tanstack/react-table";
+import { useState } from "react";
+
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -15,9 +18,9 @@ import {
   Dialog,
   DialogContent,
   DialogHeader,
+  DialogTitle,
   DialogFooter,
   DialogTrigger,
-  DialogTitle,
 } from "@/components/ui/dialog";
 import {
   AlertDialog,
@@ -29,6 +32,7 @@ import {
   AlertDialogAction,
 } from "@/components/ui/alert-dialog";
 import { Pencil, Trash2 } from "lucide-react";
+import { ViewLiveButton } from "@/components/posts/ViewLiveButton";
 
 import { toast } from "sonner";
 import { createClient } from "@/utils/supabase/client";
@@ -90,6 +94,10 @@ export default function TablePages({ data }: TablePagesProps) {
     setForm({ ...form, is_draft: checked });
   };
 
+  const setPagesList = (updater: (prev: Page[]) => Page[]) => {
+    setPages(updater);
+  };
+
   const handleSave = async () => {
     if (!form.title || !form.slug || !form.content_md) {
       toast.error("Popuni sva obavezna polja (title, slug, content_md)");
@@ -101,15 +109,15 @@ export default function TablePages({ data }: TablePagesProps) {
       if (error) return toast.error("Greška pri ažuriranju");
       toast.success("Stranica ažurirana");
 
-      setPages((prev) =>
-        prev.map((p) => (p.id === editData.id ? { ...p, ...form } : p))
+      setPagesList((prev: Page[]) =>
+        prev.map((p: Page) => (p.id === editData.id ? { ...p, ...form } : p))
       );
     } else {
       const { data: newPage, error } = await supabase.from("pages").insert([form]).select().single();
       if (error) return toast.error("Greška pri dodavanju");
       toast.success("Stranica dodana");
 
-      setPages((prev) => [newPage!, ...prev]);
+      setPagesList((prev: Page[]) => [newPage!, ...prev]);
     }
 
     setOpenDialog(false);
@@ -129,7 +137,7 @@ export default function TablePages({ data }: TablePagesProps) {
     if (error) return toast.error("Greška pri brisanju");
     toast.success("Stranica izbrisana");
 
-    setPages((prev) => prev.filter((p) => p.id !== id));
+    setPagesList((prev: Page[]) => prev.filter((p: Page) => p.id !== id));
     setOpenDeleteId(null);
   };
 
@@ -139,6 +147,18 @@ export default function TablePages({ data }: TablePagesProps) {
     { accessorKey: "created_at", header: "Created", cell: ({ getValue }) => getValue() ? new Date(getValue() as string).toLocaleDateString() : "-" },
     { accessorKey: "updated_at", header: "Updated", cell: ({ getValue }) => getValue() ? new Date(getValue() as string).toLocaleDateString() : "-" },
     { accessorKey: "is_draft", header: "Draft", cell: ({ getValue }) => (getValue() ? "Yes" : "No") },
+    {
+      accessorKey: "view_live",
+      header: "View Live",
+      cell: ({ row }) => {
+        const page = row.original;
+        const url = `/o-meni/${page.slug}`; // Adjust the URL structure as needed
+
+        return (
+          <ViewLiveButton isDraft={page.is_draft} url={url} />
+        );
+      },
+    },
     {
       header: "Actions",
       cell: ({ row }) => {

@@ -56,4 +56,16 @@ function Button({
   )
 }
 
+// Added a new button style with a 3D effect
+export function Button3D({ children, onClick }: { children: React.ReactNode; onClick?: () => void }) {
+  return (
+    <button
+      onClick={onClick}
+      className="px-6 py-3 bg-white text-gray-800 font-semibold rounded-lg shadow-md hover:shadow-lg active:shadow-inner transition-shadow duration-200"
+    >
+      {children}
+    </button>
+  );
+}
+
 export { Button, buttonVariants }

@@ -8,6 +8,7 @@ import { Children, isValidElement, cloneElement } from "react";
 import { motion } from "framer-motion";
 import Image from "next/image";
 import Link from "next/link";
+import { ShareButtons } from "@/components/posts/ShareButtons"
 
 interface FancyPostLayoutProps {
   title: string;
@@ -18,6 +19,7 @@ interface FancyPostLayoutProps {
   prev?: string | null;
   next?: string | null;
   category?: string;
+  slug: string; // Added slug as a required prop
 }
 
 interface Section {
@@ -49,6 +51,7 @@ export default function FancyPostLayout({
   prev,
   next,
   category,
+  slug,
 }: FancyPostLayoutProps) {
   const elements = Children.toArray(content);
 
@@ -200,6 +203,13 @@ export default function FancyPostLayout({
             </blockquote>
           </motion.div>
         )}
+
+        <NewsletterSignup />
+
+        <ShareButtons
+  title={title}
+  url={`${process.env.NEXT_PUBLIC_SITE_URL}/${category}/${slug}`}
+/>
 
         {/* Navigation */}
         <div className="flex justify-between pt-12 border-t border-border">

@@ -1,13 +1,13 @@
-
 import FancyPageLayout from "@/components/FancyPageLayout";
 import { Suspense } from "react";
 import { Metadata } from "next";
+import { loadContent } from "@/lib/loadContent.server";
 
 export const dynamic = "force-dynamic";
 
 export async function generateMetadata(): Promise<Metadata> {
   const { data } = await loadContent({ table: "pages", slug: "o-meni" });
-  
+
   return {
     title: data.title || "O meni",
     description: data.description || "Več o meni.",
@@ -15,7 +15,6 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 async function LoadContent() {
-  const { loadContentList } = await import("@/lib/loadContent.server");
   const { MDXContent } = await loadContent({ table: "pages", slug: "o-meni" });
 
   return (

@@ -42,7 +42,7 @@ export default async function BlogPostPage({
 
   const idx = list?.findIndex((r: PostListItem) => r.slug === params.slug) ?? -1;
   const prev = idx > 0 ? list![idx - 1].slug : null;
-  const next = idx >= 0 && idx < list!.length - 1 ? list![idx + 1].slug : null;
+  const next = idx >= 0 && idx < (list?.length ?? 0) - 1 ? list![idx + 1].slug : null;
 
   // 3. Render the blog post
   return (
@@ -56,6 +56,7 @@ export default async function BlogPostPage({
         prev={prev}
         next={next}
         category={params.category}
+        slug={params.slug} // Pass slug to FancyPostLayout
       />
     </React.Suspense>
   );
