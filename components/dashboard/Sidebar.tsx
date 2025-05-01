@@ -105,68 +105,53 @@ const Sidebar = () => {
         </Link>
       </Button>
 
-      <Button
-  variant="ghost"
-  className="w-full justify-start gap-2"
-  onClick={async () => {
-    const res = await fetch('/api/newsletter/send', { method: 'POST' });
-    if (res.ok) {
-      toast.success("Email uspešno poslan naročnikom.");
-    } else {
-      toast.error("Napaka pri pošiljanju.");
-    }
-  }}
->
-  <Send className="h-5 w-5" />
-  Pošlji email naročnikom
-</Button>
-
+      {/* Newsletter sending button with confirmation dialog */}
       <AlertDialog>
-  <AlertDialogTrigger asChild>
-    <Button variant="ghost" className="w-full justify-start gap-2">
-      <Send className="h-5 w-5" />
-      Pošlji email naročnikom
-    </Button>
-  </AlertDialogTrigger>
+        <AlertDialogTrigger asChild>
+          <Button variant="ghost" className="w-full justify-start gap-2">
+            <Send className="h-5 w-5" />
+            Pošlji email naročnikom
+          </Button>
+        </AlertDialogTrigger>
 
-  <AlertDialogContent>
-    <AlertDialogHeader>
-      <AlertDialogTitle>Pošlji email vsem naročnikom?</AlertDialogTitle>
-      <AlertDialogDescription>
-        S tem boš vsem potrjenim naročnikom poslal email kampanjo. Želiš nadaljevati?
-      </AlertDialogDescription>
-    </AlertDialogHeader>
-    <AlertDialogFooter>
-      <AlertDialogCancel>Prekliči</AlertDialogCancel>
-      <AlertDialogAction
-        onClick={async () => {
-          const res = await fetch('/api/newsletter/send', { method: 'POST' })
-          if (res.ok) {
-            toast.success("Email uspešno poslan naročnikom.")
-          } else {
-            toast.error("Napaka pri pošiljanju.")
-          }
-        }}
-      >
-        Pošlji
-      </AlertDialogAction>
-    </AlertDialogFooter>
-  </AlertDialogContent>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Pošlji email vsem naročnikom?</AlertDialogTitle>
+            <AlertDialogDescription>
+              S tem boš vsem potrjenim naročnikom poslal email kampanjo. Želiš nadaljevati?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Prekliči</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={async () => {
+                const res = await fetch('/api/newsletter/send', { method: 'POST' })
+                if (res.ok) {
+                  toast.success("Email uspešno poslan naročnikom.")
+                } else {
+                  toast.error("Napaka pri pošiljanju.")
+                }
+              }}
+            >
+              Pošlji
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
       </AlertDialog>
 
       <Button
-  asChild
-  variant="ghost"
-  className={cn(
-    "w-full justify-start gap-2",
-    isActive("/dashboard/newsletter") && activeClass
-  )}
->
-  <Link href="/dashboard/newsletter">
-    <Mail className="h-5 w-5" />
-    Newsletter
-  </Link>
-</Button>
+        asChild
+        variant="ghost"
+        className={cn(
+          "w-full justify-start gap-2",
+          isActive("/dashboard/newsletter") && activeClass
+        )}
+      >
+        <Link href="/dashboard/newsletter">
+          <Mail className="h-5 w-5" />
+          Newsletter
+        </Link>
+      </Button>
       
     </aside>
   );

@@ -135,8 +135,12 @@ export default function NewsletterPage() {
         onChange={(e) => setBody(e.target.value)}
       />
 
-      <Button onClick={handleSend} disabled={loading}>
-        {loading ? 'Pošiljam...' : 'Pošlji naročnikom'}
+      <Button 
+        onClick={handleSend} 
+        disabled={loading}
+        className="w-full"
+      >
+        {loading ? 'Pošiljam...' : 'Pošlji email naročnikom'}
       </Button>
 
       {dailyGrowth.length > 0 && (
