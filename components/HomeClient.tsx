@@ -1,44 +1,37 @@
-"use client";
+'use client'
 
-import Link from "next/link";
-import Image from "next/image";
-import { createClient } from "@/utils/supabase/client";
+import { useEffect } from 'react'
+import Link from 'next/link'
+import Image from 'next/image'
 
-export default async function HomePage() {
-  const supabase = createClient();
+type Category = {
+  id: string
+  name: string
+  slug: string
+  image_url: string | null
+}
 
-  // 1) pridobi kategorije
-  const { data: categories, error: catError } = await supabase
-    .from("categories")
-    .select("id, name, slug, image_url");
+type Post = {
+  slug: string
+  categories: { slug: string }
+}
 
-  // 2) pridobi zadnjo objavo + njeno kategorijo prek relation join-a
-  const { data: latestPost, error: postError } = await supabase
-    .from("posts")
-    .select(
-      `
-      slug,
-      category_id,
-      categories:category_id (
-        slug
-      )
-      `
-    )
-    .order("published_at", { ascending: false })
-    .limit(1)
-    .single();
+export default function HomeClient({
+  categories,
+  latestPost,
+}: {
+  categories: Category[]
+  latestPost: Post
+}) {
+  useEffect(() => {
+    if (window.location.hash === '#kategorije') {
+      const el = document.getElementById('kategorije')
+      el?.scrollIntoView({ behavior: 'smooth' })
+    }
+  }, [])
 
-  if (catError || postError) {
-    console.error("Supabase error:", catError || postError);
-    return (
-      <main className="flex flex-col bg-pink-100 text-pink-900">
-        <p>Error loading data. Please try again later.</p>
-      </main>
-    );
-  }
-
-  const postSlug = latestPost?.slug ?? "no-post";
-  const categorySlug = latestPost?.categories?.slug ?? "no-category";
+  const postSlug = latestPost?.slug ?? 'no-post'
+  const categorySlug = latestPost?.categories?.slug ?? 'no-category'
 
   return (
     <main className="flex flex-col bg-pink-100 text-pink-900">
@@ -48,9 +41,15 @@ export default async function HomePage() {
 
         <style jsx>{`
           @keyframes gradient-move {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
+            0% {
+              background-position: 0% 50%;
+            }
+            50% {
+              background-position: 100% 50%;
+            }
+            100% {
+              background-position: 0% 50%;
+            }
           }
           .animate-gradient-move {
             background-size: 200% 200%;
@@ -58,7 +57,6 @@ export default async function HomePage() {
           }
         `}</style>
 
-        {/* Slika */}
         <div className="flex-1 flex justify-center items-center">
           <div className="relative w-64 h-64 md:w-96 md:h-96 overflow-hidden rounded-full shadow-lg border-4 border-white">
             <Image
@@ -71,20 +69,17 @@ export default async function HomePage() {
           </div>
         </div>
 
-        {/* Tekst + CTA gumb */}
         <div className="flex-1 flex flex-col items-center md:items-start gap-6 text-center md:text-left">
-            <Link href="/">
-            <Image
-              src="/image.png"
-              alt="FM blog logo"
-              width={500}
-              height={200}
-              className="transition-transform duration-500 hover:scale-110"
-              priority
+          <div className="flex justify-center">
+            <img
+              src="/ginAIblog-transparent-white-cut.png"
+              className="max-w-full h-auto w-[300px] md:w-[500px] drop-shadow-lg"
+              alt="ginAI-blog logo"
             />
-            </Link>
+          </div>
+
           <p className="font-subheading text-lg md:text-2xl max-w-lg">
-            Od medicine do programiranja — in vsega vmes, kar pritegne mojo radovednost.
+            Od medicine do umetne inteligence — in vsega vmes, kar pritegne mojo radovednost.
           </p>
           <Link
             href={`/${categorySlug}/${postSlug}`}
@@ -96,7 +91,10 @@ export default async function HomePage() {
       </section>
 
       {/* Kategorije */}
-      <section className="py-24 px-6 md:px-16 w-full grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12 bg-purple-50">
+      <section
+        id="kategorije"
+        className="py-24 px-6 md:px-16 w-full grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12 bg-purple-50"
+      >
         {categories.map((cat) => (
           <Link
             key={cat.id}
@@ -112,13 +110,11 @@ export default async function HomePage() {
               />
             </div>
             <div className="p-6">
-              <h3 className="text-2xl font-bold mb-2 text-purple-900">
-                {cat.name}
-              </h3>
+              <h3 className="text-2xl font-bold mb-2 text-purple-900">{cat.name}</h3>
             </div>
           </Link>
         ))}
       </section>
     </main>
-  );
+  )
 }
