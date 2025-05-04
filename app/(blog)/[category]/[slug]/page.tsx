@@ -11,19 +11,24 @@ interface PostListItem {
   slug: string;
 }
 
-export default async function BlogPostPage({
-  params,
-}: {
-  params: { category: string; slug: string };
-}) {
+interface PageProps {
+  params: {
+    category: string;
+    slug: string;
+  };
+}
+
+export default async function BlogPostPage({ params }: PageProps) {
+  const { category, slug } = params; // destructure na začetku
+
   const { loadContent } = await import("@/lib/loadContent.server");
   const supabase = await createClient();
 
   // 1. Load the post content
   const result = await loadContent({
     table: "posts",
-    slug: params.slug,
-    categorySlug: params.category,
+    slug,
+    categorySlug: category,
   });
 
   if (!result?.data) {
@@ -40,7 +45,7 @@ export default async function BlogPostPage({
     .eq("is_draft", false)
     .order("published_at");
 
-  const idx = list?.findIndex((r: PostListItem) => r.slug === params.slug) ?? -1;
+  const idx = list?.findIndex((r: PostListItem) => r.slug === slug) ?? -1;
   const prev = idx > 0 ? list![idx - 1].slug : null;
   const next = idx >= 0 && idx < (list?.length ?? 0) - 1 ? list![idx + 1].slug : null;
 
@@ -55,8 +60,8 @@ export default async function BlogPostPage({
         images={post.images}
         prev={prev}
         next={next}
-        category={params.category}
-        slug={params.slug} // Pass slug to FancyPostLayout
+        category={category}
+        slug={slug}
       />
     </React.Suspense>
   );

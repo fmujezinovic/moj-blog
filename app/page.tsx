@@ -117,7 +117,11 @@ export default function HomePage() {
       </section>
 
       {/* Kategorije */}
-      <section className="py-24 px-6 md:px-16 w-full grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12 bg-purple-50">
+    <section
+  id="kategorije"
+  className="py-24 px-6 md:px-16 w-full grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12 bg-purple-50"
+>
+
         {categories.map((cat) => (
           <Link
             key={cat.id}
