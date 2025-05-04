@@ -1,30 +1,13 @@
 "use client";
 
-
-import { Mail } from "lucide-react"
+import { Mail, LayoutDashboard, FileText, FilePlus, Folder, PlusCircle } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, FileText, FilePlus, Folder, PlusCircle } from "lucide-react"; // ➕ Dodal PlusCircle ikono
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
-import {
-  AlertDialog,
-  AlertDialogContent,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogDescription,
-  AlertDialogTrigger,
-  AlertDialogCancel,
-  AlertDialogAction,
-} from "@/components/ui/alert-dialog"
-import { Send } from "lucide-react"
-import { toast } from "sonner"
-
 const Sidebar = () => {
   const pathname = usePathname();
-
   const isActive = (path: string) => pathname.startsWith(path);
 
   const activeClass =
@@ -37,10 +20,7 @@ const Sidebar = () => {
       <Button
         asChild
         variant="ghost"
-        className={cn(
-          "w-full justify-start gap-2",
-          isActive("/dashboard") && activeClass
-        )}
+        className={cn("w-full justify-start gap-2", isActive("/dashboard") && activeClass)}
       >
         <Link href="/dashboard">
           <LayoutDashboard className="h-5 w-5" />
@@ -51,10 +31,7 @@ const Sidebar = () => {
       <Button
         asChild
         variant="ghost"
-        className={cn(
-          "w-full justify-start gap-2",
-          isActive("/dashboard/posts") && activeClass
-        )}
+        className={cn("w-full justify-start gap-2", isActive("/dashboard/posts") && activeClass)}
       >
         <Link href="/dashboard/posts">
           <FileText className="h-5 w-5" />
@@ -62,14 +39,10 @@ const Sidebar = () => {
         </Link>
       </Button>
 
-      {/* ➕ Create New Post */}
       <Button
         asChild
         variant="ghost"
-        className={cn(
-          "w-full justify-start gap-2",
-          isActive("/dashboard/posts/create") && activeClass
-        )}
+        className={cn("w-full justify-start gap-2", isActive("/dashboard/posts/create") && activeClass)}
       >
         <Link href="/dashboard/posts/create">
           <PlusCircle className="h-5 w-5" />
@@ -80,10 +53,7 @@ const Sidebar = () => {
       <Button
         asChild
         variant="ghost"
-        className={cn(
-          "w-full justify-start gap-2",
-          isActive("/dashboard/pages") && activeClass
-        )}
+        className={cn("w-full justify-start gap-2", isActive("/dashboard/pages") && activeClass)}
       >
         <Link href="/dashboard/pages">
           <FilePlus className="h-5 w-5" />
@@ -91,13 +61,22 @@ const Sidebar = () => {
         </Link>
       </Button>
 
+      {/* ➕ Create New Page */}
       <Button
         asChild
         variant="ghost"
-        className={cn(
-          "w-full justify-start gap-2",
-          isActive("/dashboard/categories") && activeClass
-        )}
+        className={cn("w-full justify-start gap-2", isActive("/dashboard/pages/create") && activeClass)}
+      >
+        <Link href="/dashboard/pages/create">
+          <PlusCircle className="h-5 w-5" />
+          Create Page
+        </Link>
+      </Button>
+
+      <Button
+        asChild
+        variant="ghost"
+        className={cn("w-full justify-start gap-2", isActive("/dashboard/categories") && activeClass)}
       >
         <Link href="/dashboard/categories">
           <Folder className="h-5 w-5" />
@@ -105,54 +84,16 @@ const Sidebar = () => {
         </Link>
       </Button>
 
-      {/* Newsletter sending button with confirmation dialog */}
-      <AlertDialog>
-        <AlertDialogTrigger asChild>
-          <Button variant="ghost" className="w-full justify-start gap-2">
-            <Send className="h-5 w-5" />
-            Pošlji email naročnikom
-          </Button>
-        </AlertDialogTrigger>
-
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Pošlji email vsem naročnikom?</AlertDialogTitle>
-            <AlertDialogDescription>
-              S tem boš vsem potrjenim naročnikom poslal email kampanjo. Želiš nadaljevati?
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Prekliči</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={async () => {
-                const res = await fetch('/api/newsletter/send', { method: 'POST' })
-                if (res.ok) {
-                  toast.success("Email uspešno poslan naročnikom.")
-                } else {
-                  toast.error("Napaka pri pošiljanju.")
-                }
-              }}
-            >
-              Pošlji
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-
       <Button
         asChild
         variant="ghost"
-        className={cn(
-          "w-full justify-start gap-2",
-          isActive("/dashboard/newsletter") && activeClass
-        )}
+        className={cn("w-full justify-start gap-2", isActive("/dashboard/newsletter") && activeClass)}
       >
         <Link href="/dashboard/newsletter">
           <Mail className="h-5 w-5" />
           Newsletter
         </Link>
       </Button>
-      
     </aside>
   );
 };

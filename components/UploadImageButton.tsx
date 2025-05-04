@@ -1,4 +1,4 @@
-"use client";
+ "use client";
 
 import { useEffect, useRef, useState } from "react";
 import { v4 as uuidv4 } from "uuid";
@@ -20,16 +20,14 @@ export default function UploadImageButton({
   const inputRef = useRef<HTMLInputElement>(null);
   const supabase = createClient();
 
-  const [uploading,   setUploading]   = useState(false);
-  const [progress,    setProgress]    = useState(0);
+  const [uploading, setUploading] = useState(false);
+  const [progress, setProgress] = useState(0);
   const [uploadedUrl, setUploadedUrl] = useState<string | null>(null);
 
-  /* thumbnail za Unsplash/Pexels */
   useEffect(() => {
     if (externalUrl) setUploadedUrl(externalUrl);
   }, [externalUrl]);
 
-  /* ---- upload helper ---- */
   const uploadFile = async (file: File) => {
     try {
       setUploading(true);
@@ -39,22 +37,24 @@ export default function UploadImageButton({
         await supabase.storage.from("images").remove([currentUploadedPath]);
       }
 
-      const ext      = file.name.split(".").pop();
+      const ext = file.name.split(".").pop();
       const fileName = `${uuidv4()}.${ext}`;
 
       const { data, error } = await supabase.storage
         .from("images")
         .upload(fileName, file, { cacheControl: "3600" });
+
       if (error || !data) throw error;
 
       for (let i = 0; i <= 100; i += 10) {
-        await new Promise(r => setTimeout(r, 20));
+        await new Promise((r) => setTimeout(r, 20));
         setProgress(i);
       }
 
       const { data: urlData, error: urlErr } = supabase
         .storage.from("images")
         .getPublicUrl(data.path);
+
       if (urlErr || !urlData?.publicUrl) throw urlErr;
 
       setUploadedUrl(urlData.publicUrl);
@@ -82,12 +82,14 @@ export default function UploadImageButton({
     }
   };
 
-  /* ---- UI ---- */
   return (
     <div
-      onPaste={e => {
+      onPaste={(e) => {
         for (const it of e.clipboardData.items) {
-          if (it.type.includes("image")) it.getAsFile() && uploadFile(it.getAsFile()!);
+          if (it.type.includes("image")) {
+            const file = it.getAsFile();
+            if (file) uploadFile(file);
+          }
         }
       }}
       className="border-2 border-dashed border-gray-300 p-6 rounded-lg text-center text-gray-500 hover:border-gray-400 transition relative"
@@ -103,7 +105,7 @@ export default function UploadImageButton({
             onClick={removeImage}
             className="text-red-500 underline text-sm hover:text-red-600"
           >
-            Odstrani sliku
+            Odstrani sliko
           </button>
         </div>
       ) : uploading ? (
@@ -118,7 +120,7 @@ export default function UploadImageButton({
         </div>
       ) : (
         <div onClick={() => inputRef.current?.click()}>
-          Klikni za upload slike ili prilepi (CTRL+V)
+          Klikni za upload slike ali prilepi (CTRL+V)
         </div>
       )}
 
@@ -127,7 +129,7 @@ export default function UploadImageButton({
         type="file"
         accept="image/*"
         className="hidden"
-        onChange={e => e.target.files?.[0] && uploadFile(e.target.files[0])}
+        onChange={(e) => e.target.files?.[0] && uploadFile(e.target.files[0])}
       />
     </div>
   );
