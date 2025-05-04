@@ -9,6 +9,7 @@ import { motion } from "framer-motion";
 import Image from "next/image";
 import Link from "next/link";
 import { ShareButtons } from "@/components/posts/ShareButtons"
+import NewsletterSignup from "@/components/posts/NewsletterSignup";
 
 interface FancyPostLayoutProps {
   title: string;

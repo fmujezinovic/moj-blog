@@ -22,7 +22,7 @@ export default function NewsletterSignup() {
 
   return (
     <div className="bg-muted p-6 rounded-xl mt-16 shadow-md">
-      <h3 className="text-xl font-semibold mb-2">Prijavi se na newsletter</h3>
+      <h3 className="text-xl font-semibold mb-2">Prijavi se na e-novice</h3>
       <p className="text-sm text-muted-foreground mb-4">
         Prejmi nove objave in koristne vsebine direktno v svoj email.
       </p>
