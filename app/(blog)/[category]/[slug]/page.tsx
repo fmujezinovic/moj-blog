@@ -1,5 +1,3 @@
-// app/blog/[category]/[slug]/page.tsx
-
 import * as React from "react";
 import { notFound } from "next/navigation";
 import FancyPostLayout from "@/components/FancyPostLayout";
@@ -19,16 +17,21 @@ interface PageProps {
 }
 
 export default async function BlogPostPage({ params }: PageProps) {
-  const { category, slug } = params; // destructure na začetku
+  const { category, slug } = params;
+
+  const supabase = createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+
+  const isAdmin = user?.email?.endsWith("@tvojadminmail.com") || false;
 
   const { loadContent } = await import("@/lib/loadContent.server");
-  const supabase = await createClient();
 
   // 1. Load the post content
   const result = await loadContent({
     table: "posts",
     slug,
     categorySlug: category,
+    includeDraft: isAdmin, // <--- to dodaš
   });
 
   if (!result?.data) {
@@ -37,7 +40,7 @@ export default async function BlogPostPage({ params }: PageProps) {
 
   const { data: post, MDXContent } = result;
 
-  // 2. Get prev/next navigation
+  // 2. Get prev/next navigation (le za objavljene objave)
   const { data: list } = await supabase
     .from("posts")
     .select("slug")

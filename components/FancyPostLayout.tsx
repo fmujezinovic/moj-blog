@@ -1,5 +1,3 @@
-// components/FancyPostLayout.tsx
-
 "use client";
 
 import { Fragment } from "react";
@@ -8,7 +6,7 @@ import { Children, isValidElement, cloneElement } from "react";
 import { motion } from "framer-motion";
 import Image from "next/image";
 import Link from "next/link";
-import { ShareButtons } from "@/components/posts/ShareButtons"
+import { ShareButtons } from "@/components/posts/ShareButtons";
 import NewsletterSignup from "@/components/posts/NewsletterSignup";
 
 interface FancyPostLayoutProps {
@@ -20,13 +18,13 @@ interface FancyPostLayoutProps {
   prev?: string | null;
   next?: string | null;
   category?: string;
-  slug: string; // Added slug as a required prop
+  slug: string;
 }
 
 interface Section {
   id: string;
   label: string;
-  heading: any; // Temporarily using any to fix type errors
+  heading: any;
   body: ReactNode[];
 }
 
@@ -56,7 +54,6 @@ export default function FancyPostLayout({
 }: FancyPostLayoutProps) {
   const elements = Children.toArray(content);
 
-  // Build sections and TOC
   const sections: Section[] = [];
   let current: Omit<Section, "heading"> & { heading: JSX.Element | null } = {
     id: "",
@@ -76,23 +73,23 @@ export default function FancyPostLayout({
       current.body.push(el);
     }
   });
-  
+
   if (current.heading) {
     sections.push({ ...current, heading: current.heading });
   }
 
   return (
     <div className="flex flex-row-reverse bg-muted min-h-screen">
-      {/* Sidebar TOC - sticky for md+ */}
+      {/* Sidebar TOC */}
       {sections.length > 1 && (
         <aside className="hidden lg:block w-64 sticky top-24 self-start h-screen pt-12 pr-8">
           <nav className="bg-white rounded-lg shadow-sm p-4">
             <h3 className="font-heading text-lg mb-4">Vsebina</h3>
             <ul className="space-y-2">
-              {sections.map((sec) => (
-                <li key={sec.id}>
+              {sections.map((sec, index) => (
+                <li key={`${sec.id}-${index}`}>
                   <a
-                    href={`#${sec.id}`}
+                    href={`#${sec.id}-${index}`}
                     className="text-primary hover:underline block py-1 px-2 rounded transition-colors hover:bg-primary/5"
                   >
                     {sec.label}
@@ -155,8 +152,8 @@ export default function FancyPostLayout({
         {/* Sections */}
         {sections.map((section, index) => (
           <motion.section
-            key={section.id}
-            id={section.id}
+            key={`${section.id}-${index}`}
+            id={`${section.id}-${index}`}
             initial="hidden"
             whileInView="visible"
             viewport={{ once: true, amount: 0.3 }}
@@ -208,9 +205,9 @@ export default function FancyPostLayout({
         <NewsletterSignup />
 
         <ShareButtons
-  title={title}
-  url={`${process.env.NEXT_PUBLIC_SITE_URL}/${category}/${slug}`}
-/>
+          title={title}
+          url={`${process.env.NEXT_PUBLIC_SITE_URL}/${category}/${slug}`}
+        />
 
         {/* Navigation */}
         <div className="flex justify-between pt-12 border-t border-border">
