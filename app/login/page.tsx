@@ -9,20 +9,21 @@ export default function LoginPage() {
   const router = useRouter()
   const supabase = createClient()
 
-  const handleLogin = async () => {
-  await supabase.auth.signInWithOtp({
-  email,
-  options: {
-    emailRedirectTo: 'http://localhost:3000/login/callback',
-  },
-})
+const handleLogin = async () => {
+  const { error } = await supabase.auth.signInWithOtp({
+    email,
+    options: {
+      emailRedirectTo: 'http://localhost:3000/login/callback',
+    },
+  });
 
-    if (error) {
-      alert('Napaka pri prijavi: ' + error.message)
-    } else {
-      alert('Preveri e-pošto za prijavno povezavo.')
-    }
+  if (error) {
+    alert('Napaka pri prijavi: ' + error.message);
+  } else {
+    alert('Preveri e-pošto za prijavno povezavo.');
   }
+};
+
 
   return (
     <div className="p-8 max-w-md mx-auto">
