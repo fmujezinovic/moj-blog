@@ -1,44 +1,59 @@
-"use client";
+'use client';
 
-import Link from "next/link";
-import Image from "next/image";
-import { createClient } from "@/utils/supabase/client";
+import { useEffect, useState } from 'react';
+import Link from 'next/link';
+import Image from 'next/image';
+import { createClient } from '@/utils/supabase/client';
 
-export default async function HomePage() {
-  const supabase = createClient();
+export default function HomePage() {
+  const [categories, setCategories] = useState<any[]>([]);
+  const [latestPost, setLatestPost] = useState<any | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
-  // 1) pridobi kategorije
-  const { data: categories, error: catError } = await supabase
-    .from("categories")
-    .select("id, name, slug, image_url");
+  useEffect(() => {
+    const fetchData = async () => {
+      const supabase = createClient();
 
-  // 2) pridobi zadnjo objavo + njeno kategorijo prek relation join-a
-  const { data: latestPost, error: postError } = await supabase
-    .from("posts")
-    .select(
-      `
-      slug,
-      category_id,
-      categories:category_id (
-        slug
-      )
-      `
-    )
-    .order("published_at", { ascending: false })
-    .limit(1)
-    .single();
+      const { data: categoriesData, error: catError } = await supabase
+        .from('categories')
+        .select('id, name, slug, image_url');
 
-  if (catError || postError) {
-    console.error("Supabase error:", catError || postError);
+      const { data: latestPostData, error: postError } = await supabase
+        .from('posts')
+        .select(`
+          slug,
+          category_id,
+          categories:category_id (
+            slug
+          )
+        `)
+        .order('published_at', { ascending: false })
+        .limit(1)
+        .single();
+
+      if (catError || postError) {
+        console.error('Supabase error:', catError || postError);
+        setError('Napaka pri nalaganju podatkov.');
+        return;
+      }
+
+      setCategories(categoriesData ?? []);
+      setLatestPost(latestPostData ?? null);
+    };
+
+    fetchData();
+  }, []);
+
+  if (error) {
     return (
       <main className="flex flex-col bg-pink-100 text-pink-900">
-        <p>Error loading data. Please try again later.</p>
+        <p>{error}</p>
       </main>
     );
   }
 
-  const postSlug = latestPost?.slug ?? "no-post";
-  const categorySlug = latestPost?.categories?.slug ?? "no-category";
+  const postSlug = latestPost?.slug ?? 'no-post';
+  const categorySlug = latestPost?.categories?.slug ?? 'no-category';
 
   return (
     <main className="flex flex-col bg-pink-100 text-pink-900">
@@ -48,9 +63,15 @@ export default async function HomePage() {
 
         <style jsx>{`
           @keyframes gradient-move {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
+            0% {
+              background-position: 0% 50%;
+            }
+            50% {
+              background-position: 100% 50%;
+            }
+            100% {
+              background-position: 0% 50%;
+            }
           }
           .animate-gradient-move {
             background-size: 200% 200%;
@@ -73,7 +94,7 @@ export default async function HomePage() {
 
         {/* Tekst + CTA gumb */}
         <div className="flex-1 flex flex-col items-center md:items-start gap-6 text-center md:text-left">
-            <Link href="/">
+          <Link href="/">
             <Image
               src="/image.png"
               alt="FM blog logo"
@@ -82,7 +103,7 @@ export default async function HomePage() {
               className="transition-transform duration-500 hover:scale-110"
               priority
             />
-            </Link>
+          </Link>
           <p className="font-subheading text-lg md:text-2xl max-w-lg">
             Od medicine do programiranja — in vsega vmes, kar pritegne mojo radovednost.
           </p>
