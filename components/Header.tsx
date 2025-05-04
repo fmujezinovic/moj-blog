@@ -38,6 +38,7 @@ export default function Header() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [activeSection, setActiveSection] = useState<string | null>(null);
   const [user, setUser] = useState<any>(null);
+  const [role, setRole] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -66,10 +67,26 @@ export default function Header() {
   }, []);
 
   useEffect(() => {
-    supabase.auth.getUser().then(({ data }) => {
-      setUser(data.user);
+    const fetchUser = async () => {
+      const { data: userData } = await supabase.auth.getUser();
+      setUser(userData.user);
+
+      if (userData.user) {
+        const { data: profile } = await supabase
+          .from('users')
+          .select('role')
+          .eq('id', userData.user.id)
+          .single();
+
+        if (profile) {
+          setRole(profile.role);
+        }
+      }
+
       setLoading(false);
-    });
+    };
+
+    fetchUser();
   }, []);
 
   const handleLogout = async () => {
@@ -79,13 +96,11 @@ export default function Header() {
 
   const goToSection = (sectionId: string) => {
     if (pathname === '/') {
-      // če smo že na home strani – samo scrollaj
       const el = document.getElementById(sectionId);
       if (el) {
         el.scrollIntoView({ behavior: 'smooth' });
       }
     } else {
-      // drugače pojdi na /#sekcija
       router.push(`/#${sectionId}`);
     }
   };
@@ -115,15 +130,24 @@ export default function Header() {
           >
             Kategorije
           </NavLink>
-          
 
-          {!loading && user && (
-            <button
-              onClick={handleLogout}
-              className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors"
-            >
-              Odjavi se
-            </button>
+          {!loading && user && role === 'admin' && (
+            <>
+              <NavLink href="/dashboard" isActive={pathname.startsWith('/dashboard')}>
+                <Link href="/dashboard">Dashboard</Link>
+              </NavLink>
+
+              <button
+                onClick={handleLogout}
+                className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors"
+              >
+                Odjavi se
+              </button>
+
+              <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center text-xs font-bold text-foreground border">
+                {user.email?.charAt(0).toUpperCase() ?? 'A'}
+              </div>
+            </>
           )}
         </div>
       </nav>
