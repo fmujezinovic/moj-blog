@@ -9,22 +9,23 @@ export default function LoginCallbackPage() {
   const supabase = createClient()
 
   useEffect(() => {
-    const exchangeCode = async () => {
-      const { error } = await supabase.auth.exchangeCodeForSession()
-      if (error) {
-        console.error('Exchange error:', error)
-        router.replace('/login')
-      } else {
+    const check = async () => {
+      const { data, error } = await supabase.auth.getSession()
+      if (data.session) {
+        console.log('✅ Prijavljen:', data.session)
         router.replace('/dashboard')
+      } else {
+        console.error('❌ Ni prijave')
+        router.replace('/login')
       }
     }
 
-    exchangeCode()
+    check()
   }, [router, supabase])
 
   return (
-    <div className="p-8">
-      <p>Prijavljamo vas...</p>
+    <div className="p-8 text-center">
+      <p>Preverjam prijavo...</p>
     </div>
   )
 }
