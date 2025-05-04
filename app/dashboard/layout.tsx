@@ -6,7 +6,7 @@ import { requireAdmin } from "@/lib/require-admin";
 const inter = Inter({ subsets: ["latin"], variable: "--font-sans" });
 
 export default async function DashboardLayout({ children }: { children: ReactNode }) {
-
+  await requireAdmin(); // 🔐 zaščita za admin dostop
 
   return (
     <div className={`flex min-h-screen ${inter.variable} font-sans bg-background text-foreground`}>
