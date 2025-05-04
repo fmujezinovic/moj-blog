@@ -115,13 +115,7 @@ export default function Header() {
           >
             Kategorije
           </NavLink>
-          <NavLink
-            href="/#povezave"
-            isActive={activeSection === 'povezave'}
-            onClick={() => goToSection('povezave')}
-          >
-            Povezave
-          </NavLink>
+          
 
           {!loading && user && (
             <button
