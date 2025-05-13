@@ -26,6 +26,7 @@ import { Pencil, Trash2 } from "lucide-react";
 import { ViewLiveButton } from "@/components/posts/ViewLiveButton";
 import { toast } from "sonner";
 import { createClient } from "@/utils/supabase/client";
+import Link from "next/link";
 
 type Page = {
   id: string;
@@ -60,7 +61,24 @@ export default function TablePages({ data }: TablePagesProps) {
   };
 
   const columns: ColumnDef<Page>[] = [
-    { accessorKey: "title", header: "Title" },
+    {
+  accessorKey: "title",
+  header: "Title",
+  cell: ({ row }) => {
+    const page = row.original;
+    const href = `/${page.slug}`; // ustvari direktni URL
+    return (
+      <Link
+        href={href}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="text-primary font-medium hover:underline"
+      >
+        {page.title}
+      </Link>
+    );
+  },
+},
     { accessorKey: "slug", header: "Slug" },
     {
       accessorKey: "created_at",
@@ -79,15 +97,7 @@ export default function TablePages({ data }: TablePagesProps) {
       header: "Draft",
       cell: ({ getValue }) => (getValue() ? "Yes" : "No"),
     },
-    {
-      accessorKey: "view_live",
-      header: "View Live",
-      cell: ({ row }) => {
-        const page = row.original;
-        const url = `/o-meni/${page.slug}`; // prilagodi glede na strukturo URL-jev
-        return <ViewLiveButton isDraft={page.is_draft} url={url} />;
-      },
-    },
+    
     {
       header: "Actions",
       cell: ({ row }) => {

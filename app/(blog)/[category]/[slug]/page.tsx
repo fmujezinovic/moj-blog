@@ -22,7 +22,7 @@ export default async function BlogPostPage({ params }: PageProps) {
   const supabase = createClient();
   const { data: { user } } = await supabase.auth.getUser();
 
-  const isAdmin = user?.email?.endsWith("@tvojadminmail.com") || false;
+  const isAdmin = (user?.email === ("fmujezinovic@gmail.com")) || false;
 
   const { loadContent } = await import("@/lib/loadContent.server");
 

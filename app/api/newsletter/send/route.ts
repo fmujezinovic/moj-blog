@@ -22,6 +22,7 @@ export async function POST() {
 
   const postUrl = `${process.env.NEXT_PUBLIC_SITE_URL}/${latestPost.categories.slug}/${latestPost.slug}`
 
+
   // 📩 2. Pridobi vse naročnike
   const { data: subscribers, error: subError } = await supabase
     .from('emails')

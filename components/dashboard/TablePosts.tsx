@@ -113,9 +113,20 @@ export default function TablePosts({ data }: { data: Post[] }) {
   );
 
 const columns: ColumnDef<Post>[] = [
- {
+{
   accessorKey: "title",
   header: "Naslov",
+  cell: ({ row }) => {
+    const post = row.original;
+    return (
+      <Link
+        href={`/dashboard/posts/${post.slug}/view`}
+        className="text-primary font-medium hover:underline"
+      >
+        {post.title}
+      </Link>
+    );
+  },
 },
 
   {
@@ -201,14 +212,7 @@ const columns: ColumnDef<Post>[] = [
     return (
       <>
         <div className="flex gap-2">
-          <Button
-            size="icon"
-            variant="secondary"
-            title="View"
-            onClick={() => router.push(`/dashboard/posts/${post.slug}/view`)}
-          >
-            👁
-          </Button>
+          
           <Button
             size="icon"
             variant="outline"
