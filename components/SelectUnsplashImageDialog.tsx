@@ -1,31 +1,51 @@
-"use client";
+'use client';
 
 import { useState } from "react";
 import {
-  Dialog, DialogContent, DialogTrigger,
-  DialogHeader, DialogTitle,
+  Dialog,
+  DialogContent,
+  DialogTrigger,
+  DialogHeader,
+  DialogTitle,
 } from "@/components/ui/dialog";
-import { Input }  from "@/components/ui/input";
+import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 
-interface SelectImageDialogProps {
-  onSelect: (url: string) => void;
+interface UnsplashImage {
+  url: string;       // za končni izbor
+  alt: string;       // alt besedilo
+  preview: string;   // za predogled
 }
 
-export function SelectUnsplashImageDialog({ onSelect }: SelectImageDialogProps) {
-  const [open,        setOpen]        = useState(false);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [images,      setImages]      = useState<string[]>([]);
-  const [loading,     setLoading]     = useState(false);
+interface SelectUnsplashImageDialogProps {
+  onSelect: (image: UnsplashImage) => void;
+}
 
-  /* Traži fotografije */
+export function SelectUnsplashImageDialog({
+  onSelect,
+}: SelectUnsplashImageDialogProps) {
+  const [open, setOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [images, setImages] = useState<UnsplashImage[]>([]);
+  const [loading, setLoading] = useState(false);
+
+  /* 1. Poizvedba na API */
   const handleSearch = async () => {
     if (!searchQuery.trim()) return;
     setLoading(true);
     try {
-      const res  = await fetch(`/api/unsplash?query=${encodeURIComponent(searchQuery)}`);
+      const res = await fetch(
+        `/api/unsplash?query=${encodeURIComponent(searchQuery)}`
+      );
       const data = await res.json();
-      setImages(data.results || []);
+
+      // mapiramo iz surove strukture na UnsplashImage[]
+      const mapped = (data.results || []).map((img: any) => ({
+        url: img.full,
+        alt: img.alt || img.description || searchQuery,
+        preview: img.regular,
+      }));
+      setImages(mapped);
     } catch (err) {
       console.error("Napaka pri iskanju Unsplash slik:", err);
     } finally {
@@ -33,20 +53,18 @@ export function SelectUnsplashImageDialog({ onSelect }: SelectImageDialogProps) 
     }
   };
 
-  /* Klik na thumbnail = odabir slike */
-  const handleImageSelect = (image: any) => {
-    onSelect({
-      url: image.full, // Using full quality image for final selection
-      alt: image.alt,
-      preview: image.regular, // Using regular quality for preview
-    });
+  /* 2. Izbor slike iz mreže */
+  const handleImageSelect = (img: UnsplashImage) => {
+    onSelect(img);
     setOpen(false);
   };
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant="outline" size="sm">Izberi iz Unsplash</Button>
+        <Button variant="outline" size="sm">
+          Izberi iz Unsplash
+        </Button>
       </DialogTrigger>
 
       <DialogContent className="max-w-5xl">
@@ -54,13 +72,13 @@ export function SelectUnsplashImageDialog({ onSelect }: SelectImageDialogProps) 
           <DialogTitle>Izberi sliko iz Unsplash</DialogTitle>
         </DialogHeader>
 
-        {/* Tražilica */}
+        {/* Polje za iskanje */}
         <div className="flex gap-2">
           <Input
             placeholder="Iskanje slik (npr. AI, narava, mesto...)"
             value={searchQuery}
-            onChange={e => setSearchQuery(e.target.value)}
-            onKeyDown={e => {
+            onChange={(e) => setSearchQuery(e.target.value)}
+            onKeyDown={(e) => {
               if (e.key === "Enter") {
                 e.preventDefault();
                 handleSearch();
@@ -72,17 +90,17 @@ export function SelectUnsplashImageDialog({ onSelect }: SelectImageDialogProps) 
           </Button>
         </div>
 
-        {/* Rezultati */}
+        {/* Prikaz rezultatov */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 max-h-[400px] overflow-y-auto mt-4">
-          {images.map((image: any, i: number) => (
+          {images.map((img, i) => (
             <div
               key={i}
               className="relative cursor-pointer group"
-              onClick={() => handleImageSelect(image)}
+              onClick={() => handleImageSelect(img)}
             >
               <img
-                src={image.small}
-                alt={image.alt}
+                src={img.preview}
+                alt={img.alt}
                 className="w-full h-48 object-cover rounded-lg transition-all duration-200 group-hover:opacity-75"
               />
             </div>
