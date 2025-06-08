@@ -1,4 +1,3 @@
-// app/dashboard/posts/page.tsx
 import * as React from "react";
 import { createClient } from "@/utils/supabase/server";
 import TablePosts from "@/components/dashboard/TablePosts";
@@ -28,19 +27,16 @@ export default async function PostsPage() {
     console.error("Napaka pri pridobivanju objav:", error.message);
   }
 
-  // Pretvorimo array categories[] v single object
+  // Pretvorimo tako, da kategorije ostanejo kot array
   const posts =
     rawPosts?.map((p) => ({
       id: p.id,
       title: p.title,
       slug: p.slug,
       published_at: p.published_at,
-      is_draft: p.is_draft,
-      // Supabase vrne categories kot polje, vzamemo prvi element ali default
-      categories:
-        Array.isArray(p.categories) && p.categories.length > 0
-          ? p.categories[0]
-          : { name: "", slug: "" },
+      is_draft: p.is_draft === null ? true : p.is_draft,
+      // tu pustimo array, ne single objekt
+      categories: Array.isArray(p.categories) ? p.categories : [],
     })) || [];
 
   return (
