@@ -1,17 +1,24 @@
 "use client";
 
-import type { ImageRef } from "@/types/image";
 import { Label } from "@/components/ui/label";
 import UploadImageButton from "@/components/UploadImageButton";
 import { SelectUnsplashImageDialog } from "@/components/SelectUnsplashImageDialog";
-import { SelectPexelsImageDialog }   from "@/components/SelectPexelsImageDialog";
+import { SelectPexelsImageDialog } from "@/components/SelectPexelsImageDialog";
 
-interface Props {
-  current: ImageRef | undefined;
+interface ImageRef {
+  url: string;
+  path: string | null;
+}
+
+interface CoverImageSelectorProps {
+  current?: ImageRef;
   onSelect: (ref: ImageRef) => void;
 }
 
-export default function CoverImageSelector({ current, onSelect }: Props) {
+export default function CoverImageSelector({
+  current,
+  onSelect,
+}: CoverImageSelectorProps) {
   const wrap = (u: string | ImageRef): ImageRef =>
     typeof u === "string" ? { url: u, path: null } : u;
 
@@ -26,8 +33,8 @@ export default function CoverImageSelector({ current, onSelect }: Props) {
       />
 
       <div className="flex gap-4 mt-2">
-        <SelectUnsplashImageDialog onSelect={u => onSelect(wrap(u))} />
-        <SelectPexelsImageDialog  onSelect={u => onSelect(wrap(u))} />
+        <SelectUnsplashImageDialog onSelect={(u) => onSelect(wrap(u))} />
+        <SelectPexelsImageDialog onSelect={(u) => onSelect(wrap(u))} />
       </div>
     </div>
   );
