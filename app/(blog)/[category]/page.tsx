@@ -10,17 +10,20 @@ export default async function CategoryPage({
 }: {
   params: Promise<{ category: string }>;
 }) {
-  // Najprej await-aj params
+  // 1. Await params
   const { category } = await params;
 
-  const { loadContentList } = await import("@/lib/loadContent.server");
+  // 2. Dinamični import za nalaganje seznama objav
+  const { loadContentList } = await import("@/lib/loadContentList.server");
 
+  // 3. Pridobi seznam objav iz izbrane kategorije
   const { data: posts } = await loadContentList({
     table: "posts",
     categorySlug: category,
   });
 
-  if (!posts) {
+  // Če kategorija ne obstaja ali ni objav
+  if (!posts || posts.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen text-center">
         <h1 className="font-heading text-4xl text-primary mb-4">
@@ -39,19 +42,18 @@ export default async function CategoryPage({
 
       {/* Posts Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-        {posts.map((post) => {
+        {posts.map((post: any) => {
+          // Nastavi privzeto sliko
           let coverImage = "/images/placeholder.jpg";
 
+          // Poskusi parsirati sliko iz JSON ali objekta
           try {
-            const imagesArray = Array.isArray(post.images)
-              ? post.images
-              : JSON.parse(post.images || "[]");
+            const imagesArray =
+              typeof post.images === "string"
+                ? JSON.parse(post.images)
+                : post.images;
 
-            if (
-              Array.isArray(imagesArray) &&
-              imagesArray.length > 0 &&
-              imagesArray[0]?.url
-            ) {
+            if (Array.isArray(imagesArray) && imagesArray[0]?.url) {
               coverImage = imagesArray[0].url;
             }
           } catch {
