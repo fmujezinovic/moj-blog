@@ -20,9 +20,10 @@ export default async function BlogPostPage({ params }: PageProps) {
   const { category, slug } = params;
 
   const supabase = createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const { data, error } = await supabase.auth.getUser();
+const user = data?.user || null;
+const isAdmin = user?.email === "fmujezinovic@gmail.com";
 
-  const isAdmin = (user?.email === ("fmujezinovic@gmail.com")) || false;
 
   const { loadContent } = await import("@/lib/loadContent.server");
 

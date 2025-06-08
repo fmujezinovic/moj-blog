@@ -1,15 +1,21 @@
 /* app/globals.css */
 
+
+@import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+
+
 
 /* -------------------------------------------------------- */
 /* 1. CSS varijable (prilagojene tvojemu dizajnu)            */
 /* -------------------------------------------------------- */
 :root {
   --font-sans: 'Open Sans', sans-serif;
-  --font-heading: 'Poppins', sans-serif;
+  --font-heading: 'DM Serif Display', serif;
   --font-subheading: 'Inter', sans-serif;
 
   --background: 270 60% 98%;
@@ -48,7 +54,7 @@ body {
 @layer base {
 
   h1 {
-      @apply font-heading text-5xl md:text-6xl text-heading tracking-tight mb-6;
+      @apply font-heading text-5xl md:text-6xl text-heading tracking-tight mb-6 leading-[2];
     }
   
     h2 {
@@ -69,9 +75,9 @@ body {
   }
 
   button,
-  a {
-    @apply font-sans;
-  }
+    a {
+      @apply font-sans font-medium text-primary underline decoration-1 underline-offset-2 hover:text-primary-foreground transition-colors;
+    }
 
   .font-heading {
     font-family: var(--font-heading), sans-serif;
@@ -79,5 +85,11 @@ body {
 
   .font-subheading {
     font-family: var(--font-subheading), sans-serif;
+  }
+}
+
+@layer utilities {
+  .prose {
+    text-align: justify;
   }
 }

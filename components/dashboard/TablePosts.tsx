@@ -1,11 +1,11 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+
 import {
   useReactTable,
   getCoreRowModel,
@@ -121,7 +121,8 @@ const columns: ColumnDef<Post>[] = [
     return (
       <Link
         href={`/dashboard/posts/${post.slug}/view`}
-        className="text-primary font-medium hover:underline"
+        className="text-primary hover:text-[#6856f1] hover:underline transition-colors"
+
       >
         {post.title}
       </Link>

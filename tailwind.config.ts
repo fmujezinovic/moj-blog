@@ -54,6 +54,7 @@ const config: Config = {
         "button, a": { "@apply font-sans": {} },
       });
     },
+    require('@tailwindcss/typography')
   ],
 };
 
