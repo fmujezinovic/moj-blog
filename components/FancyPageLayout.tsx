@@ -9,7 +9,6 @@ import {
 import { motion } from 'framer-motion';
 import Image from 'next/image';
 
-// Lokalna definicija tipa namesto uvoza
 interface ImageRef {
   url: string;
 }
@@ -77,9 +76,13 @@ export default function FancyPageLayout({
           variants={fadeInUp}
           className="text-center mb-12"
         >
-          {cloneElement(mainHeading as React.ReactElement, {
-            className: 'font-heading text-5xl sm:text-6xl text-primary mb-6',
-          })}
+          {cloneElement(
+            mainHeading as React.ReactElement<React.HTMLAttributes<any>>,
+            {
+              className:
+                'font-heading text-5xl sm:text-6xl text-primary mb-6',
+            }
+          )}
           {resolveUrl(heroImage) && (
             <div className="w-40 h-40 mx-auto rounded-full overflow-hidden shadow-lg relative">
               <Image
@@ -123,9 +126,13 @@ export default function FancyPageLayout({
             {index % 2 === 0 ? (
               <>
                 <div>
-                  {cloneElement(section.heading as React.ReactElement, {
-                    className: 'font-heading text-3xl sm:text-4xl text-heading mb-6',
-                  })}
+                  {cloneElement(
+                    section.heading as React.ReactElement<React.HTMLAttributes<any>>,
+                    {
+                      className:
+                        'font-heading text-3xl sm:text-4xl text-heading mb-6',
+                    }
+                  )}
                   <div className="space-y-4 text-lg font-subheading text-foreground leading-relaxed text-justify">
                     {section.body}
                   </div>
@@ -154,9 +161,13 @@ export default function FancyPageLayout({
                   </div>
                 )}
                 <div className="order-1 md:order-2">
-                  {cloneElement(section.heading as React.ReactElement, {
-                    className: 'font-heading text-3xl sm:text-4xl text-heading mb-6',
-                  })}
+                  {cloneElement(
+                    section.heading as React.ReactElement<React.HTMLAttributes<any>>,
+                    {
+                      className:
+                        'font-heading text-3xl sm:text-4xl text-heading mb-6',
+                    }
+                  )}
                   <div className="space-y-4 text-lg font-subheading text-foreground leading-relaxed text-justify">
                     {section.body}
                   </div>
