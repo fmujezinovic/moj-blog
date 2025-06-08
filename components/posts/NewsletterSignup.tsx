@@ -1,8 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import React, { useState } from "react";
 
-export default function NewsletterSignup(): JSX.Element {
+export default function NewsletterSignup(): React.ReactElement {
   const [email, setEmail] = useState("");
   const [submitted, setSubmitted] = useState(false);
 
@@ -28,9 +28,14 @@ export default function NewsletterSignup(): JSX.Element {
       </p>
 
       {submitted ? (
-        <p className="text-green-600 font-medium">Preveri svoj email za potrditev ✅</p>
+        <p className="text-green-600 font-medium">
+          Preveri svoj email za potrditev ✅
+        </p>
       ) : (
-        <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row gap-2">
+        <form
+          onSubmit={handleSubmit}
+          className="flex flex-col sm:flex-row gap-2"
+        >
           <input
             type="email"
             required
