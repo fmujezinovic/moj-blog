@@ -1,3 +1,4 @@
+// hooks/usePostForm.ts
 "use client";
 
 import { useEffect, useState } from "react";
@@ -12,7 +13,7 @@ import {
 } from "@/utils/markdown";
 import { extractPathFromPublicUrl } from "@/utils/storage";
 
-// Local definition of ImageRef (no longer imported)
+// locally defined, no more `@/types/image`
 interface ImageRef {
   url: string;
   path: string | null;
@@ -23,7 +24,6 @@ export const usePostForm = () => {
   const router = useRouter();
   const { slug } = useParams<{ slug?: string }>();
 
-  /* ---------------- STATE ---------------- */
   const [title, setTitle] = useState("");
   const [published, setPublished] = useState(false);
   const [sections, setSections] = useState<UiSection[]>([
@@ -38,17 +38,15 @@ export const usePostForm = () => {
   const isEdit = Boolean(slug);
   const [publishDate, setPublishDate] = useState<string | null>(null);
   const [description, setDescription] = useState("");
-  const [intro, setIntro] = useState("");           // ← for intro
-  const [conclusion, setConclusion] = useState(""); // ← for conclusion
+  const [intro, setIntro] = useState("");
+  const [conclusion, setConclusion] = useState("");
 
-  /* ------------- FETCHING -------------- */
   useEffect(() => {
     (async () => {
       await fetchCategories();
       if (isEdit) await fetchPost();
       else setImages([{ url: "", path: null }]);
     })();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [slug]);
 
   const fetchCategories = async () => {
@@ -63,7 +61,6 @@ export const usePostForm = () => {
       .select("*")
       .eq("slug", slug!)
       .single();
-
     if (error) {
       toast.error("Napaka pri nalaganju posta");
       return;
@@ -78,7 +75,6 @@ export const usePostForm = () => {
     setConclusion(data.conclusion || "");
     setPublishDate(data.published_at ? new Date(data.published_at).toISOString() : null);
 
-    // reconstruct ImageRef[] from stored array or single URL
     const imgArr: ImageRef[] = (Array.isArray(data.images) ? data.images : []).map((img: any) =>
       typeof img === "string"
         ? { url: img, path: extractPathFromPublicUrl(img) }
@@ -95,7 +91,6 @@ export const usePostForm = () => {
     setSelectedTab("0");
   };
 
-  /* ------------- HANDLERS -------------- */
   const addSection = () => {
     const newIdx = sections.length;
     setSections(p => [...p, { heading: "", content: "", imageUrl: "", uploadedImagePath: null }]);
@@ -104,13 +99,12 @@ export const usePostForm = () => {
     return newIdx;
   };
 
-  const updateSection = (idx: number, field: "heading" | "content", val: string) => {
+  const updateSection = (idx: number, field: "heading" | "content", val: string) =>
     setSections(p => {
       const u = [...p];
       (u[idx] as any)[field] = val;
       return u;
     });
-  };
 
   const deleteSection = (idx: number) => {
     if (sections.length <= 1) {
@@ -123,7 +117,6 @@ export const usePostForm = () => {
     setSelectedTab("0");
   };
 
-  /* ------------- IMAGES -------------- */
   const setCoverImage = async (ref: ImageRef) => {
     if (coverUploadedPath) {
       await supabase.storage.from("images").remove([coverUploadedPath]);
@@ -138,9 +131,7 @@ export const usePostForm = () => {
 
   const setSectionImage = async (idx: number, ref: ImageRef) => {
     const oldPath = sections[idx].uploadedImagePath;
-    if (oldPath) {
-      await supabase.storage.from("images").remove([oldPath]);
-    }
+    if (oldPath) await supabase.storage.from("images").remove([oldPath]);
     setSections(p => {
       const u = [...p];
       u[idx].imageUrl = ref.url;
@@ -155,14 +146,13 @@ export const usePostForm = () => {
     });
   };
 
-  /* ------------- SAVE -------------- */
   const save = async () => {
     if (!title.trim() || !categoryId) {
       toast.error("Naslov in kategorija sta obvezna");
       return;
     }
     if (!description.trim() || description.length > 160) {
-      toast.error("Opis (description) je obvezen in naj bo ≤160 znakov");
+      toast.error("Opis je obvezen in naj bo ≤160 znakov");
       return;
     }
     if (!sections.some(s => s.heading.trim() && s.content.trim())) {
@@ -214,35 +204,35 @@ export const usePostForm = () => {
         toast.success("Post ustvarjen");
       }
       router.push("/dashboard/posts");
-    } catch (e) {
-      console.error(e);
+    } catch {
       toast.error("Napaka pri shranjevanju");
     } finally {
       setLoading(false);
     }
   };
 
-  /* -------- PUBLIC API -------- */
   return {
-    // basic fields
+    // state
     title, setTitle,
     published, setPublished,
     description, setDescription,
     intro, setIntro,
     conclusion, setConclusion,
     publishDate, setPublishDate,
-    // categories
-    categories,
-    categoryId, setCategoryId,
-    // sections & images
     sections, setSections,
     selectedTab, setSelectedTab,
-    addSection, updateSection, deleteSection,
+    categories,
+    categoryId, setCategoryId,
     images,
-    setCoverImage, setSectionImage,
     coverUploadedPath,
-    // fetch/save
-    loading,
+    loading,          // <-- now exposed
+    setLoading,       // <-- returning setter too
+    // actions
+    addSection,
+    updateSection,
+    deleteSection,
+    setCoverImage,
+    setSectionImage,
     save,
     isEdit,
   };
