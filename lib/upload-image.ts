@@ -18,7 +18,7 @@ export async function uploadImage(file: File): Promise<ImageRef> {
 
   // Generate a unique filename
   const ext      = file.name.split(".").pop();
-  const fileName = `${uuidv4()}.${ext}`;  
+  const fileName = `${uuidv4()}.${ext}`;
 
   // Upload to the "images" bucket
   const { data: uploadData, error: uploadErr } = await supabase.storage
@@ -31,15 +31,16 @@ export async function uploadImage(file: File): Promise<ImageRef> {
   }
 
   // Get its public URL
-  const { data: urlData, error: urlErr } = supabase.storage
+  const publicUrlResponse = supabase.storage
     .from("images")
     .getPublicUrl(fileName);
 
-  if (urlErr || !urlData?.publicUrl) {
-    console.error(urlErr);
+  const publicUrl = publicUrlResponse.data.publicUrl;
+  if (!publicUrl) {
+    console.error("No public URL returned", publicUrlResponse);
     throw new Error("Napaka pri pridobivanju URL-ja slike.");
   }
 
   // Return both URL and path so you can later delete the file if needed
-  return { url: urlData.publicUrl, path: uploadData.path };
+  return { url: publicUrl, path: uploadData.path };
 }
