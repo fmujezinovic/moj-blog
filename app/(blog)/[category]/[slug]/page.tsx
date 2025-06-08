@@ -5,19 +5,15 @@ import { createClient } from "@/utils/supabase/server";
 
 export const dynamic = "force-dynamic";
 
-// ✨ NIČ Promise v tipu
-type PageProps = {
-  params: {
-    category: string;
-    slug: string;
-  };
-};
-
 interface PostListItem {
   slug: string;
 }
 
-export default async function BlogPostPage({ params }: PageProps) {
+export default async function BlogPostPage({
+  params,
+}: {
+  params: { category: string; slug: string };
+}) {
   const { category, slug } = params;
 
   const supabase = createClient();
