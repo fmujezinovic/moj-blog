@@ -26,7 +26,7 @@ interface FancyPostLayoutProps {
 interface Section {
   id: string;
   label: string;
-  heading: React.ReactElement;
+  heading: React.ReactElement<React.HTMLAttributes<HTMLHeadingElement>>;
   body: ReactNode[];
 }
 
@@ -49,20 +49,20 @@ export default function FancyPostLayout({
   category,
   slug,
 }: FancyPostLayoutProps) {
+  // razbijemo content na ReactNode[] in poiščemo vse h2 kot sekcije
   const elements = Children.toArray(content);
-
   const sections: Section[] = [];
-  let current: Omit<Section, 'heading'> & { heading: React.ReactElement | null } = {
+  let current: Omit<Section, 'heading'> & { heading: React.ReactElement<React.HTMLAttributes<HTMLHeadingElement>> | null } = {
     id: '',
     label: '',
     heading: null,
     body: [],
   };
 
-  // Razčlenimo vsebino na sekcije
   elements.forEach((el) => {
     if (isValidElement(el) && el.type === 'h2') {
-      const headingEl = el as React.ReactElement<{ children?: ReactNode }>;
+      // castamo na Heading element, da TS ve, da podpira HTMLAttributes
+      const headingEl = el as React.ReactElement<React.HTMLAttributes<HTMLHeadingElement>>;
       if (current.heading) {
         sections.push({ ...current, heading: current.heading });
       }
@@ -81,17 +81,14 @@ export default function FancyPostLayout({
     sections.push({ ...current, heading: current.heading });
   }
 
-  // Funkcija, ki v <p> elementih obarva <a> linke
+  // v <p> elementih poiščemo <a> in jim dodamo razrede ter target/rel
   function enhanceLinks(body: ReactNode[]): ReactNode[] {
     return body.map((el, i) => {
       if (isValidElement(el) && el.type === 'p') {
         const paragraph = el as React.ReactElement<{ children?: ReactNode }>;
         const newChildren = Children.map(paragraph.props.children, (child) => {
           if (isValidElement(child) && child.type === 'a') {
-            // CAST na AnchorHTMLAttributes, da TS prepozna target/rel
-            const anchor = child as React.ReactElement<
-              React.AnchorHTMLAttributes<HTMLAnchorElement>
-            >;
+            const anchor = child as React.ReactElement<React.AnchorHTMLAttributes<HTMLAnchorElement>>;
             return cloneElement(anchor, {
               className:
                 'text-primary underline decoration-1 underline-offset-2 hover:text-pink-700 transition-colors',
@@ -132,7 +129,7 @@ export default function FancyPostLayout({
 
       {/* Main content */}
       <article className="flex-1 max-w-4xl mx-auto px-6 py-12 space-y-16">
-        {/* Cover */}
+        {/* Cover image */}
         {images[0] && (
           <motion.div
             initial={{ opacity: 0, y: 30 }}
@@ -208,10 +205,9 @@ export default function FancyPostLayout({
             transition={{ duration: 0.7, delay: index * 0.15, ease: 'easeOut' }}
             className="bg-white rounded-2xl shadow-md p-8 space-y-8"
           >
-            {cloneElement(
-              section.heading,
-              { className: 'font-heading text-3xl sm:text-4xl text-heading mb-6' }
-            )}
+            {cloneElement(section.heading, {
+              className: 'font-heading text-3xl sm:text-4xl text-heading mb-6',
+            })}
             <div className="prose prose-lg prose-primary max-w-none font-subheading text-foreground">
               {enhanceLinks(section.body)}
             </div>
@@ -271,7 +267,7 @@ export default function FancyPostLayout({
           url={`${process.env.NEXT_PUBLIC_SITE_URL}/${category}/${slug}`}
         />
 
-        {/* Navigation */}
+        {/* Prev / Next */}
         <div className="flex justify-between pt-12 border-t border-border">
           {prev ? (
             <Link
