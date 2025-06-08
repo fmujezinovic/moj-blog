@@ -1,12 +1,16 @@
- "use client";
+"use client";
 
 import { useEffect, useRef, useState } from "react";
 import { v4 as uuidv4 } from "uuid";
 import { toast } from "sonner";
 import { createClient } from "@/utils/supabase/client";
-import type { ImageRef } from "@/types/image";
 
-interface Props {
+interface ImageRef {
+  url: string;
+  path: string | null;
+}
+
+interface UploadImageButtonProps {
   currentUploadedPath: string | null;
   onUploaded: (ref: ImageRef) => void;
   externalUrl?: string;
@@ -16,7 +20,7 @@ export default function UploadImageButton({
   currentUploadedPath,
   onUploaded,
   externalUrl,
-}: Props) {
+}: UploadImageButtonProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   const supabase = createClient();
 
@@ -24,6 +28,7 @@ export default function UploadImageButton({
   const [progress, setProgress] = useState(0);
   const [uploadedUrl, setUploadedUrl] = useState<string | null>(null);
 
+  // Če dobimo zunanjo URL, jo prikažemo
   useEffect(() => {
     if (externalUrl) setUploadedUrl(externalUrl);
   }, [externalUrl]);
@@ -33,6 +38,7 @@ export default function UploadImageButton({
       setUploading(true);
       setProgress(0);
 
+      // Če je prej bil path, ga izbrišemo
       if (currentUploadedPath) {
         await supabase.storage.from("images").remove([currentUploadedPath]);
       }
@@ -40,25 +46,26 @@ export default function UploadImageButton({
       const ext = file.name.split(".").pop();
       const fileName = `${uuidv4()}.${ext}`;
 
-      const { data, error } = await supabase.storage
+      const { data: uploadData, error: uploadErr } = await supabase.storage
         .from("images")
         .upload(fileName, file, { cacheControl: "3600" });
 
-      if (error || !data) throw error;
+      if (uploadErr || !uploadData) throw uploadErr;
 
+      // Navidezni progress bar
       for (let i = 0; i <= 100; i += 10) {
         await new Promise((r) => setTimeout(r, 20));
         setProgress(i);
       }
 
-      const { data: urlData, error: urlErr } = supabase
-        .storage.from("images")
-        .getPublicUrl(data.path);
+      const { data: urlData, error: urlErr } = supabase.storage
+        .from("images")
+        .getPublicUrl(uploadData.path);
 
-      if (urlErr || !urlData?.publicUrl) throw urlErr;
+      if (urlErr || !urlData.publicUrl) throw urlErr;
 
       setUploadedUrl(urlData.publicUrl);
-      onUploaded({ url: urlData.publicUrl, path: data.path });
+      onUploaded({ url: urlData.publicUrl, path: uploadData.path });
       toast.success("Slika uspešno naložena!");
     } catch (err) {
       console.error(err);
