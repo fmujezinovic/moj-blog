@@ -1,22 +1,29 @@
-"use client";
+"use client"
 
-import type { ImageRef } from "@/types/image";
-import { UiSection } from "@/utils/markdown";
-import { Input }    from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Label }    from "@/components/ui/label";
-import { Button }   from "@/components/ui/button";
-import UploadImageButton from "@/components/UploadImageButton";
-import { SelectUnsplashImageDialog } from "@/components/SelectUnsplashImageDialog";
-import { SelectPexelsImageDialog }   from "@/components/SelectPexelsImageDialog";
-import SectionRegenerator            from "@/components/dashboard/SectionRegenerator";
+import { UiSection } from "@/utils/markdown"
+import { Input } from "@/components/ui/input"
+import { Textarea } from "@/components/ui/textarea"
+import { Label } from "@/components/ui/label"
+import { Button } from "@/components/ui/button"
+import UploadImageButton from "@/components/UploadImageButton"
+import { SelectUnsplashImageDialog } from "@/components/SelectUnsplashImageDialog"
+import { SelectPexelsImageDialog } from "@/components/SelectPexelsImageDialog"
+import SectionRegenerator from "@/components/dashboard/SectionRegenerator"
 
-interface Props {
-  idx: number;
-  section: UiSection;
-  onChange: (idx: number, field: "heading" | "content", val: string) => void;
-  onImage:  (idx: number, ref: ImageRef) => void;
-  onDelete: (idx: number) => void;
+interface ImageRef {
+  url: string
+  path: string | null
+}
+
+interface PostSectionEditorProps {
+  idx: number
+  section: UiSection & {
+    imageUrl?: string
+    uploadedImagePath?: string | null
+  }
+  onChange: (idx: number, field: "heading" | "content", val: string) => void
+  onImage: (idx: number, ref: ImageRef) => void
+  onDelete: (idx: number) => void
 }
 
 export default function PostSectionEditor({
@@ -25,71 +32,73 @@ export default function PostSectionEditor({
   onChange,
   onImage,
   onDelete,
-}: Props) {
-  const wrap = (u: string | ImageRef): ImageRef =>
-    typeof u === "string" ? { url: u, path: null } : u;
+}: PostSectionEditorProps) {
+  // wrap sprejme bodisi string URL ali že ImageRef in vrne ImageRef
+  const wrap = (u: any): ImageRef =>
+    typeof u === "string" ? { url: u, path: null } : { url: u.url, path: null }
 
   return (
-  <div className="space-y-6 bg-muted/50 p-6 rounded-md shadow-sm">
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-      {/* LEVA STRAN: heading + content */}
-      <div className="flex flex-col gap-4">
-        <div>
-          <Label className="text-md font-semibold">Podnaslov</Label>
-          <Input
-            value={section.heading}
-            placeholder="Unesi podnaslov"
-            onChange={e => onChange(idx, "heading", e.target.value)}
-          />
+    <div className="space-y-6 bg-muted/50 p-6 rounded-md shadow-sm">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {/* LEVA STRAN: heading + content */}
+        <div className="flex flex-col gap-4">
+          <div>
+            <Label className="text-md font-semibold">Podnaslov</Label>
+            <Input
+              value={section.heading}
+              placeholder="Unesi podnaslov"
+              onChange={(e) => onChange(idx, "heading", e.target.value)}
+            />
+          </div>
+
+          <div>
+            <Label className="text-md font-semibold">Vsebina</Label>
+            <Textarea
+              rows={8}
+              value={section.content}
+              placeholder="Unesi vsebino sekcije"
+              onChange={(e) => onChange(idx, "content", e.target.value)}
+            />
+          </div>
         </div>
 
-        <div>
-          <Label className="text-md font-semibold">Vsebina</Label>
-          <Textarea
-            rows={8}
-            value={section.content}
-            placeholder="Unesi vsebinu sekcije"
-            onChange={e => onChange(idx, "content", e.target.value)}
+        {/* DESNA STRAN: slika + gumbi */}
+        <div className="flex flex-col gap-4">
+          <Label className="text-md font-semibold">Slika sekcije</Label>
+
+          <UploadImageButton
+            currentUploadedPath={section.uploadedImagePath ?? null}
+            onUploaded={(ref) => onImage(idx, ref)}
+            externalUrl={section.imageUrl}
           />
+
+          <div className="flex gap-4">
+            <SelectUnsplashImageDialog
+              onSelect={(u) => onImage(idx, wrap(u))}
+            />
+            <SelectPexelsImageDialog
+              onSelect={(u) => onImage(idx, wrap(u))}
+            />
+          </div>
         </div>
       </div>
 
-      {/* DESNA STRAN: slika + gumbi */}
-      <div className="flex flex-col gap-4">
-        <Label className="text-md font-semibold">Slika sekcije</Label>
-
-        <UploadImageButton
-          currentUploadedPath={section.uploadedImagePath}
-          onUploaded={ref => onImage(idx, ref)}
-          externalUrl={section.imageUrl}
+      {/* ACTIONS */}
+      <div className="flex justify-end gap-4 mt-4">
+        <SectionRegenerator
+          sectionTitle={section.heading}
+          onRegenerate={(c) => onChange(idx, "content", c)}
         />
-
-        <div className="flex gap-4">
-          <SelectUnsplashImageDialog onSelect={u => onImage(idx, wrap(u))} />
-          <SelectPexelsImageDialog  onSelect={u => onImage(idx, wrap(u))} />
-        </div>
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          className="text-red-600 hover:bg-red-50"
+          onClick={() => onDelete(idx)}
+        >
+          Izbriši sekcijo
+        </Button>
       </div>
     </div>
-
-    {/* ACTIONS */}
-    <div className="flex justify-end gap-4 mt-4">
-      <SectionRegenerator
-        sectionTitle={section.heading}
-        onRegenerate={c => onChange(idx, "content", c)}
-      />
-      <Button
-        type="button"
-        variant="outline"
-        size="sm"
-        className="text-red-600 hover:bg-red-50"
-        onClick={() => onDelete(idx)}
-      >
-        Izbriši sekciju
-      </Button>
-    </div>
-  </div>
-);
-
+  )
 }
-
-//najbolja koda
