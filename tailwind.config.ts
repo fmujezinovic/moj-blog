@@ -16,14 +16,14 @@ const config: Config = {
     },
     extend: {
       keyframes: {
-    fadeIn: {
-      '0%': { opacity: 0 },
-      '100%': { opacity: 1 },
-    },
-  },
-  animation: {
-    fadeIn: 'fadeIn 1s ease-in-out',
-  },
+        fadeIn: {
+          "0%": { opacity: "0" },
+          "100%": { opacity: "1" },
+        },
+      },
+      animation: {
+        fadeIn: "fadeIn 1s ease-in-out",
+      },
       colors: {
         background: "hsl(var(--background))",
         foreground: "hsl(var(--foreground))",
@@ -54,7 +54,7 @@ const config: Config = {
         "button, a": { "@apply font-sans": {} },
       });
     },
-    require('@tailwindcss/typography')
+    require("@tailwindcss/typography"),
   ],
 };
 
