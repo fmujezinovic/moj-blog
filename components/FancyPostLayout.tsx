@@ -60,50 +60,48 @@ export default function FancyPostLayout({
     body: [],
   };
 
+  // Razčlenimo vsebino na sekcije
   elements.forEach((el) => {
-    // 1) type guard → el je React.ReactElement<unknown>
     if (isValidElement(el) && el.type === 'h2') {
-      // 2) castamo na el s prop children
-      const element = el as React.ReactElement<{ children?: ReactNode }>;
-
+      // castamo, da TS ve za props.children
+      const headingEl = el as React.ReactElement<{ children?: ReactNode }>;
       if (current.heading) {
         sections.push({ ...current, heading: current.heading });
       }
-      // sedaj TS ve, da props.children ni unknown
-      const text = element.props.children?.toString() || '';
-
+      const text = headingEl.props.children?.toString() || '';
       current = {
         id: slugify(text),
         label: text,
-        heading: element,
+        heading: headingEl,
         body: [],
       };
     } else if (current.heading) {
       current.body.push(el);
     }
   });
-
   if (current.heading) {
     sections.push({ ...current, heading: current.heading });
   }
 
+  // Funkcija, ki v <p> elementih obarva <a> linke
   function enhanceLinks(body: ReactNode[]) {
     return body.map((el, i) => {
       if (isValidElement(el) && el.type === 'p') {
-        return cloneElement(el, {
-          key: i,
-          children: Children.map(el.props.children, (child) => {
-            if (isValidElement(child) && child.type === 'a') {
-              return cloneElement(child, {
-                className:
-                  'text-primary underline decoration-1 underline-offset-2 hover:text-pink-700 transition-colors',
-                target: '_blank',
-                rel: 'noopener noreferrer',
-              });
-            }
-            return child;
-          }),
+        const paragraph = el as React.ReactElement<{ children?: ReactNode }>;
+        // izdelamo nove otroke
+        const newChildren = Children.map(paragraph.props.children, (child) => {
+          if (isValidElement(child) && child.type === 'a') {
+            return cloneElement(child, {
+              className:
+                'text-primary underline decoration-1 underline-offset-2 hover:text-pink-700 transition-colors',
+              target: '_blank',
+              rel: 'noopener noreferrer',
+            });
+          }
+          return child;
         });
+        // key pa posredujemo v props, otroke pa kot tretji argument
+        return cloneElement(paragraph, { key: i }, newChildren);
       }
       return el;
     });
@@ -134,7 +132,168 @@ export default function FancyPostLayout({
 
       {/* Main content */}
       <article className="flex-1 max-w-4xl mx-auto px-6 py-12 space-y-16">
-        {/** … nadaljnja koda ostane enaka … **/}
+        {/* Cover */}
+        {images[0] && (
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.7, ease: 'easeOut' }}
+            viewport={{ once: true, amount: 0.3 }}
+            className="w-full h-32 sm:h-40 md:h-48 lg:h-56 overflow-hidden rounded-xl shadow-md relative"
+          >
+            <Image
+              src={images[0]}
+              alt="Naslovna slika"
+              fill
+              style={{ objectFit: 'cover' }}
+              className="transition-transform duration-500 hover:scale-105"
+              sizes="(max-width: 640px) 100vw, (max-width: 1024px) 80vw, 1200px"
+              priority
+            />
+          </motion.div>
+        )}
+
+        {/* Title */}
+        <motion.h1
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.7, ease: 'easeOut' }}
+          viewport={{ once: true }}
+          className="
+            font-heading
+            text-2xl sm:text-3xl md:text-4xl lg:text-5xl
+            leading-tight text-center text-heading
+            tracking-tight max-w-3xl mx-auto mb-10
+          "
+        >
+          {title}
+        </motion.h1>
+
+        {/* Intro */}
+        {intro && (
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.7, ease: 'easeOut' }}
+            viewport={{ once: true }}
+          >
+            <div className="prose prose-lg prose-primary max-w-none font-sans text-foreground border-l-4 border-primary mb-12 bg-blue-50 p-6 rounded-lg shadow-sm">
+              <ReactMarkdown
+                remarkPlugins={[remarkGfm]}
+                components={{
+                  a: ({ node, ...props }) => (
+                    <a
+                      {...props}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-primary underline decoration-1 underline-offset-2 hover:text-pink-700 transition-colors"
+                    />
+                  ),
+                }}
+              >
+                {intro}
+              </ReactMarkdown>
+            </div>
+          </motion.div>
+        )}
+
+        {/* Sections */}
+        {sections.map((section, index) => (
+          <motion.section
+            key={`${section.id}-${index}`}
+            id={`${section.id}-${index}`}
+            initial={{ opacity: 0, y: 60 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, amount: 0.1 }}
+            transition={{ duration: 0.7, delay: index * 0.15, ease: 'easeOut' }}
+            className="bg-white rounded-2xl shadow-md p-8 space-y-8"
+          >
+            {cloneElement(
+              section.heading,
+              { className: 'font-heading text-3xl sm:text-4xl text-heading mb-6' }
+            )}
+            <div className="prose prose-lg prose-primary max-w-none font-subheading text-foreground">
+              {enhanceLinks(section.body)}
+            </div>
+            {images[index + 1] && (
+              <motion.div
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.7, ease: 'easeOut' }}
+                viewport={{ once: true, amount: 0.3 }}
+                className="w-full h-32 sm:h-40 md:h-48 lg:h-56 overflow-hidden rounded-xl shadow-md relative mt-8"
+              >
+                <Image
+                  src={images[index + 1]}
+                  alt={`Slika sekcije ${index + 1}`}
+                  fill
+                  style={{ objectFit: 'cover' }}
+                  className="transition-transform duration-500 hover:scale-105"
+                  sizes="(max-width: 640px) 100vw, (max-width: 1024px) 80vw, 1200px"
+                />
+              </motion.div>
+            )}
+          </motion.section>
+        ))}
+
+        {/* Conclusion */}
+        {conclusion && (
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.7, ease: 'easeOut' }}
+            viewport={{ once: true }}
+          >
+            <div className="prose prose-lg prose-primary max-w-none font-sans text-foreground border-l-4	border-primary mb-12 bg-blue-50 p-6 rounded-lg shadow-sm">
+              <ReactMarkdown
+                remarkPlugins={[remarkGfm]}
+                components={{
+                  a: ({ node, ...props }) => (
+                    <a
+                      {...props}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-primary underline decoration-1 underline-offset-2 hover:text-pink-700 transition-colors"
+                    />
+                  ),
+                }}
+              >
+                {conclusion}
+              </ReactMarkdown>
+            </div>
+          </motion.div>
+        )}
+
+        <NewsletterSignup />
+
+        <ShareButtons
+          title={title}
+          url={`${process.env.NEXT_PUBLIC_SITE_URL}/${category}/${slug}`}
+        />
+
+        {/* Navigation */}
+        <div className="flex justify-between pt-12 border-t border-border">
+          {prev ? (
+            <Link
+              href={`/blog/${category}/${prev}`}
+              className="text-primary font-medium hover:underline flex items-center gap-2"
+            >
+              ← Prejšnja objava
+            </Link>
+          ) : (
+            <div />
+          )}
+          {next ? (
+            <Link
+              href={`/blog/${category}/${next}`}
+              className="text-primary font-medium hover:underline flex items-center gap-2"
+            >
+              Naslednja objava →
+            </Link>
+          ) : (
+            <div />
+          )}
+        </div>
       </article>
     </div>
   );
