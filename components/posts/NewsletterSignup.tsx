@@ -1,24 +1,24 @@
-'use client'
+"use client";
 
-import { useState } from 'react'
+import { useState } from "react";
 
-export default function NewsletterSignup() {
-  const [email, setEmail] = useState('')
-  const [submitted, setSubmitted] = useState(false)
+export default function NewsletterSignup(): JSX.Element {
+  const [email, setEmail] = useState("");
+  const [submitted, setSubmitted] = useState(false);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
+  const handleSubmit = async (e: React.FormEvent): Promise<void> => {
+    e.preventDefault();
 
-    const res = await fetch('/api/newsletter', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+    const res = await fetch("/api/newsletter", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ email }),
-    })
+    });
 
     if (res.ok) {
-      setSubmitted(true)
+      setSubmitted(true);
     }
-  }
+  };
 
   return (
     <div className="bg-muted p-6 rounded-xl mt-16 shadow-md">
@@ -48,5 +48,5 @@ export default function NewsletterSignup() {
         </form>
       )}
     </div>
-  )
+  );
 }
