@@ -1,34 +1,52 @@
-"use client";
+"use client"
 
-import type { ImageRef } from "@/types/image";
-import { useState } from "react";
-import { Label } from "@/components/ui/label";
-import UploadImageButton from "@/components/UploadImageButton";
-import { SelectUnsplashImageDialog } from "@/components/SelectUnsplashImageDialog";
-import { SelectPexelsImageDialog } from "@/components/SelectPexelsImageDialog";
-import { Button } from "@/components/ui/button";
+import { useState } from "react"
+import { Label } from "@/components/ui/label"
+import UploadImageButton from "@/components/UploadImageButton"
+import { SelectUnsplashImageDialog } from "@/components/SelectUnsplashImageDialog"
+import { SelectPexelsImageDialog } from "@/components/SelectPexelsImageDialog"
+import { Button } from "@/components/ui/button"
 
-interface Props {
-  images: ImageRef[];
-  onChange: (images: ImageRef[]) => void;
+interface ImageRef {
+  url: string
+  path: string | null
 }
 
-export default function MultipleImageSelector({ images, onChange }: Props) {
+interface MultipleImageSelectorProps {
+  images: ImageRef[]
+  onChange: (images: ImageRef[]) => void
+}
+
+export default function MultipleImageSelector({
+  images,
+  onChange,
+}: MultipleImageSelectorProps) {
+  // wrap sprejme string ali objekt iz Unsplash/Pexels in ga pretvori v ImageRef
+  const wrap = (u: any): ImageRef => {
+    if (typeof u === "string") {
+      return { url: u, path: null }
+    }
+    if (u && typeof u.url === "string") {
+      return { url: u.url, path: null }
+    }
+    return { url: "", path: null }
+  }
+
   const handleUpdateImage = (index: number, image: ImageRef) => {
-    const updated = [...images];
-    updated[index] = image;
-    onChange(updated);
-  };
+    const updated = [...images]
+    updated[index] = image
+    onChange(updated)
+  }
 
   const handleRemove = (index: number) => {
-    const updated = [...images];
-    updated.splice(index, 1);
-    onChange(updated);
-  };
+    const updated = [...images]
+    updated.splice(index, 1)
+    onChange(updated)
+  }
 
   const handleAddEmptyImage = () => {
-    onChange([...images, { url: "", path: null }]);
-  };
+    onChange([...images, { url: "", path: null }])
+  }
 
   return (
     <div className="flex flex-col gap-6">
@@ -50,20 +68,9 @@ export default function MultipleImageSelector({ images, onChange }: Props) {
                 externalUrl={img.url || undefined}
               />
               <div className="flex gap-2">
-                <SelectUnsplashImageDialog
-                  onSelect={(url: string) =>
-                    handleUpdateImage(i, { url, path: null })
-                  }
-                />
-                <SelectPexelsImageDialog
-                  onSelect={(url: string) =>
-                    handleUpdateImage(i, { url, path: null })
-                  }
-                />
-                <Button
-                  variant="destructive"
-                  onClick={() => handleRemove(i)}
-                >
+                <SelectUnsplashImageDialog onSelect={(u) => handleUpdateImage(i, wrap(u))} />
+                <SelectPexelsImageDialog onSelect={(u) => handleUpdateImage(i, wrap(u))} />
+                <Button variant="destructive" onClick={() => handleRemove(i)}>
                   Odstrani
                 </Button>
               </div>
@@ -72,13 +79,9 @@ export default function MultipleImageSelector({ images, onChange }: Props) {
         </div>
       ))}
 
-      <Button
-        type="button"
-        variant="outline"
-        onClick={handleAddEmptyImage}
-      >
+      <Button type="button" variant="outline" onClick={handleAddEmptyImage}>
         Dodaj novo sliko
       </Button>
     </div>
-  );
+  )
 }
