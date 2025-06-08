@@ -1,26 +1,36 @@
-"use client";
+"use client"
 
-import { Label } from "@/components/ui/label";
-import UploadImageButton from "@/components/UploadImageButton";
-import { SelectUnsplashImageDialog } from "@/components/SelectUnsplashImageDialog";
-import { SelectPexelsImageDialog } from "@/components/SelectPexelsImageDialog";
+import { Label } from "@/components/ui/label"
+import UploadImageButton from "@/components/UploadImageButton"
+import { SelectUnsplashImageDialog } from "@/components/SelectUnsplashImageDialog"
+import { SelectPexelsImageDialog } from "@/components/SelectPexelsImageDialog"
 
 interface ImageRef {
-  url: string;
-  path: string | null;
+  url: string
+  path: string | null
 }
 
 interface CoverImageSelectorProps {
-  current?: ImageRef;
-  onSelect: (ref: ImageRef) => void;
+  current?: ImageRef
+  onSelect: (ref: ImageRef) => void
 }
 
 export default function CoverImageSelector({
   current,
   onSelect,
 }: CoverImageSelectorProps) {
-  const wrap = (u: string | ImageRef): ImageRef =>
-    typeof u === "string" ? { url: u, path: null } : u;
+  // wrap sprejme bodisi string ali objekt (ImageRef ali Unsplash/Pexels sliko)
+  const wrap = (u: any): ImageRef => {
+    if (typeof u === "string") {
+      return { url: u, path: null }
+    }
+    // če ima objekt lastnost url, ga vzamemo
+    if (typeof u === "object" && typeof u.url === "string") {
+      return { url: u.url, path: null }
+    }
+    // za vsak slučaj
+    return { url: "", path: null }
+  }
 
   return (
     <div className="flex flex-col gap-4">
@@ -37,5 +47,5 @@ export default function CoverImageSelector({
         <SelectPexelsImageDialog onSelect={(u) => onSelect(wrap(u))} />
       </div>
     </div>
-  );
+  )
 }
