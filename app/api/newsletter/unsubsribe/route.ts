@@ -2,27 +2,33 @@ import { createClient } from '@/utils/supabase/server'
 
 export const dynamic = 'force-dynamic'
 
-export default async function UnsubscribePage({
-  searchParams,
-}: {
-  searchParams: { token?: string; resubscribe?: string }
-}) {
-  const token = searchParams.token
-  const resubscribe = searchParams.resubscribe
+export async function GET(req: Request) {
+  const { searchParams } = new URL(req.url)
+  const token = searchParams.get('token')
+  const resubscribe = searchParams.get('resubscribe')
   const supabase = createClient()
 
   // 1. Prikaz po ponovni prijavi
   if (resubscribe === 'success') {
-    return <Message type="success" text="Ponovno si se uspešno prijavil ✅" />
+    return Response.json({
+      status: 'success',
+      message: 'Ponovno si se uspešno prijavil ✅',
+    })
   }
 
   if (resubscribe === 'error') {
-    return <Message type="error" text="Pri ponovni prijavi je prišlo do napake." />
+    return Response.json({
+      status: 'error',
+      message: 'Pri ponovni prijavi je prišlo do napake.',
+    })
   }
 
   // 2. Preveri token
   if (!token) {
-    return <Message type="error" text="Manjka odjavni žeton." />
+    return Response.json({
+      status: 'error',
+      message: 'Manjka odjavni žeton.',
+    })
   }
 
   // 3. Odjava v bazi
@@ -37,39 +43,16 @@ export default async function UnsubscribePage({
     .maybeSingle()
 
   if (error || !emailRow) {
-    return <Message type="error" text="Odjava ni uspela ali povezava ni veljavna." />
+    return Response.json({
+      status: 'error',
+      message: 'Odjava ni uspela ali povezava ni veljavna.',
+    })
   }
 
-  // 4. Uspešna odjava + možnost za ponovno prijavo
-  return (
-    <Message type="success" text="Uspešno si se odjavil od prejemanja novic. 🙁">
-      <form action="/api/newsletter/resubscribe" method="POST" className="mt-6">
-        <input type="hidden" name="token" value={token} />
-        <button
-          type="submit"
-          className="px-4 py-2 rounded bg-primary text-white hover:bg-primary/90 transition"
-        >
-          Želim se znova prijaviti
-        </button>
-      </form>
-    </Message>
-  )
-}
-
-function Message({
-  type,
-  text,
-  children,
-}: {
-  type: 'success' | 'error'
-  text: string
-  children?: React.ReactNode
-}) {
-  const color = type === 'success' ? 'text-green-600' : 'text-red-600'
-  return (
-    <main className="min-h-screen flex flex-col items-center justify-center px-4 text-center">
-      <div className={`text-xl font-medium ${color}`}>{text}</div>
-      {children}
-    </main>
-  )
+  // 4. Uspešna odjava
+  return Response.json({
+    status: 'success',
+    message: 'Uspešno si se odjavil od prejemanja novic. 🙁',
+    token, // vrni token za morebitno ponovno prijavo
+  })
 }
