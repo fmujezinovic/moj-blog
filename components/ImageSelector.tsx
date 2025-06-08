@@ -1,13 +1,18 @@
-"use client";
+'use client';
 
 import { useState } from "react";
-import type { ImageRef } from "@/types/image";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import UploadImageButton from "@/components/UploadImageButton";
 import { SelectUnsplashImageDialog } from "@/components/SelectUnsplashImageDialog";
 import { SelectPexelsImageDialog } from "@/components/SelectPexelsImageDialog";
 import Image from "next/image";
+
+// Lokalna definicija tipa, ker '@/types/image' ne obstaja
+interface ImageRef {
+  url: string;
+  path: string | null;
+}
 
 interface ImageSelectorProps {
   value: ImageRef | null;
