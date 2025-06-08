@@ -1,7 +1,8 @@
-// ✅ Strežniška komponenta (ni "use client")
-
+import * as React from "react";
 import Link from "next/link";
 import Image from "next/image";
+import { notFound } from "next/navigation";
+import { createClient } from "@/utils/supabase/server";
 
 export const dynamic = "force-dynamic";
 
@@ -10,20 +11,17 @@ export default async function CategoryPage({
 }: {
   params: Promise<{ category: string }>;
 }) {
-  // 1. Await params
   const { category } = await params;
+  const supabase = createClient();
 
-  // 2. Dinamični import za nalaganje seznama objav
-  const { loadContentList } = await import("@/lib/loadContentList.server");
+  // 1. Pridobi ID kategorije
+  const { data: cat, error: catErr } = await supabase
+    .from("categories")
+    .select("id")
+    .eq("slug", category)
+    .single();
 
-  // 3. Pridobi seznam objav iz izbrane kategorije
-  const { data: posts } = await loadContentList({
-    table: "posts",
-    categorySlug: category,
-  });
-
-  // Če kategorija ne obstaja ali ni objav
-  if (!posts || posts.length === 0) {
+  if (catErr || !cat) {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen text-center">
         <h1 className="font-heading text-4xl text-primary mb-4">
@@ -34,38 +32,42 @@ export default async function CategoryPage({
     );
   }
 
+  // 2. Pridobi vse objave iz te kategorije
+  const { data: posts, error: postsErr } = await supabase
+    .from("posts")
+    .select("id, slug, title, published_at, images")
+    .eq("category_id", cat.id)
+    .eq("is_draft", false)
+    .order("published_at", { ascending: false });
+
+  if (postsErr || !posts) {
+    notFound();
+  }
+
+  // 3. Prikaži mrežo objav
   return (
     <main className="max-w-6xl mx-auto p-6 space-y-12 bg-background text-foreground">
       <h1 className="font-heading text-4xl md:text-5xl text-primary text-center capitalize">
         {category.replace(/-/g, " ")}
       </h1>
 
-      {/* Posts Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-        {posts.map((post: any) => {
-          // Nastavi privzeto sliko
+        {posts.map((post) => {
           let coverImage = "/images/placeholder.jpg";
 
-          // Poskusi parsirati sliko iz JSON ali objekta
           try {
-            const imagesArray =
-              typeof post.images === "string"
-                ? JSON.parse(post.images)
-                : post.images;
-
-            if (Array.isArray(imagesArray) && imagesArray[0]?.url) {
-              coverImage = imagesArray[0].url;
+            const arr = Array.isArray(post.images)
+              ? post.images
+              : JSON.parse(post.images || "[]");
+            if (Array.isArray(arr) && arr.length > 0 && arr[0]?.url) {
+              coverImage = arr[0].url;
             }
           } catch {
             console.error("Napaka pri parsiranju slik za post:", post.slug);
           }
 
           return (
-            <Link
-              key={post.id}
-              href={`/${category}/${post.slug}`}
-              className="group"
-            >
+            <Link key={post.id} href={`/${category}/${post.slug}`} className="group">
               <article className="flex flex-col md:flex-row bg-muted rounded-xl overflow-hidden hover:shadow-lg transition-all h-full">
                 <div className="relative w-full md:w-48 h-48 md:h-auto overflow-hidden">
                   <Image
