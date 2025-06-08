@@ -7,25 +7,24 @@ import { ViewLiveButton } from "@/components/posts/ViewLiveButton";
 
 export const dynamic = "force-dynamic";
 
-interface ViewPageProps {
-  params: { slug: string };
-}
+export default async function ViewPage({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}) {
+  // Await params because Next.js params are now a Promise
+  const { slug } = await params;
 
-export default async function ViewPage(props: ViewPageProps) {
-  const slug = props.params.slug;
-
-  const { loadContent } = await import("@/lib/loadContent.server");
-  const supabase = await createClient();
+  const supabase = createClient();
 
   // 1. Naloži post (vključno z osnutki)
-  const {
-    data: post,
-    MDXContent,
-  } = await loadContent({
-    table: "posts",
-    slug,
-    includeDraft: true, // ⚠️ zelo pomembno za admin prikaz
-  });
+  const { data: post, MDXContent } = await import("@/lib/loadContent.server").then(({ loadContent }) =>
+    loadContent({
+      table: "posts",
+      slug,
+      includeDraft: true, // ⚠️ zelo pomembno za admin prikaz
+    })
+  );
 
   if (!post) {
     notFound();
@@ -39,9 +38,9 @@ export default async function ViewPage(props: ViewPageProps) {
     .eq("is_draft", false)
     .order("published_at");
 
-  const idx = list.findIndex((r: any) => r.slug === slug);
-  const prev = idx > 0 ? list[idx - 1].slug : null;
-  const next = idx < list.length - 1 ? list[idx + 1].slug : null;
+  const idx = list?.findIndex((r: any) => r.slug === slug) ?? -1;
+  const prev = idx > 0 ? list![idx - 1].slug : null;
+  const next = idx < (list?.length ?? 0) - 1 ? list![idx + 1].slug : null;
 
   // 3. Prikaz UI
   return (
