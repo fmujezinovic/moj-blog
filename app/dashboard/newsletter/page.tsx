@@ -25,13 +25,11 @@ export default function NewsletterPage() {
 
   function downloadCSV(data: any[], filename: string) {
     const csv = [
-      Object.keys(data[0]).join(','),
+      Object.keys(data[0]).join(','), 
       ...data.map((row) => Object.values(row).join(',')),
     ].join('\n')
-
     const blob = new Blob([csv], { type: 'text/csv' })
     const url = URL.createObjectURL(blob)
-
     const a = document.createElement('a')
     a.href = url
     a.download = filename
@@ -40,7 +38,10 @@ export default function NewsletterPage() {
   }
 
   useEffect(() => {
-    const supabase = createBrowserClient()
+    const supabase = createBrowserClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+    )
 
     supabase
       .from('active_subscribers')
@@ -55,18 +56,12 @@ export default function NewsletterPage() {
       .select('created_at')
       .then(({ data }) => {
         if (!data) return
-
-        const counts: { [date: string]: number } = {}
+        const counts: Record<string, number> = {}
         data.forEach((row) => {
           const date = new Date(row.created_at).toISOString().split('T')[0]
           counts[date] = (counts[date] || 0) + 1
         })
-
-        const result = Object.entries(counts).map(([date, count]) => ({
-          date,
-          count,
-        }))
-
+        const result = Object.entries(counts).map(([date, count]) => ({ date, count }))
         setDailyGrowth(result.sort((a, b) => a.date.localeCompare(b.date)))
       })
 
@@ -86,7 +81,6 @@ export default function NewsletterPage() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ subject, body }),
     })
-
     if (res.ok) {
       toast.success('Newsletter uspešno poslan.')
       setSubject('')
@@ -94,14 +88,12 @@ export default function NewsletterPage() {
     } else {
       toast.error('Napaka pri pošiljanju.')
     }
-
     setLoading(false)
   }
 
   return (
     <div className="max-w-2xl mx-auto mt-10 space-y-6">
       <h1 className="text-3xl font-bold">Pošlji newsletter</h1>
-
       <p className="text-muted-foreground">
         Trenutno imaš <strong>{subscribers.length}</strong> aktivnih naročnikov.
       </p>
@@ -127,7 +119,6 @@ export default function NewsletterPage() {
         value={subject}
         onChange={(e) => setSubject(e.target.value)}
       />
-
       <Textarea
         rows={10}
         placeholder="Vsebina emaila (HTML podprt)"
@@ -135,11 +126,7 @@ export default function NewsletterPage() {
         onChange={(e) => setBody(e.target.value)}
       />
 
-      <Button 
-        onClick={handleSend} 
-        disabled={loading}
-        className="w-full"
-      >
+      <Button onClick={handleSend} disabled={loading} className="w-full">
         {loading ? 'Pošiljam...' : 'Pošlji email naročnikom'}
       </Button>
 
@@ -151,7 +138,7 @@ export default function NewsletterPage() {
               <XAxis dataKey="date" />
               <YAxis allowDecimals={false} />
               <Tooltip />
-              <Line type="monotone" dataKey="count" stroke="#3b82f6" strokeWidth={2} />
+              <Line type="monotone" dataKey="count" strokeWidth={2} />
             </LineChart>
           </ResponsiveContainer>
         </div>
