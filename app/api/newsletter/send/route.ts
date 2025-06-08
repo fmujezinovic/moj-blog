@@ -1,42 +1,53 @@
-import { createClient } from '@/utils/supabase/server'
-import { NextResponse } from 'next/server'
-import { Resend } from 'resend'
+import { createClient } from '@/utils/supabase/server';
+import { NextResponse } from 'next/server';
+import { Resend } from 'resend';
 
-const resend = new Resend(process.env.RESEND_API_KEY)
+const resend = new Resend(process.env.RESEND_API_KEY!);
 
 export async function POST() {
-  const supabase = createClient()
+  const supabase = createClient();
 
-  // 🔎 1. Pridobi najnovejši objavljen post
+  // 1. Pridobi najnovejši objavljen post
   const { data: latestPost, error: postError } = await supabase
     .from('posts')
-    .select('title, slug, categories(slug)')
+    .select('title, slug, categories ( slug )')
     .eq('is_draft', false)
     .order('published_at', { ascending: false })
     .limit(1)
-    .maybeSingle()
+    .maybeSingle();
 
   if (postError || !latestPost) {
-    return NextResponse.json({ error: 'Ni objavljenih vsebin' }, { status: 404 })
+    return NextResponse.json(
+      { error: 'Ni objavljenih vsebin' },
+      { status: 404 }
+    );
   }
 
-  const postUrl = `${process.env.NEXT_PUBLIC_SITE_URL}/${latestPost.categories.slug}/${latestPost.slug}`
+  // Napovedujemo, da categories vedno vrne polje
+  const cats = Array.isArray(latestPost.categories)
+    ? latestPost.categories
+    : [];
+  const categorySlug = cats.length > 0 ? cats[0].slug : '';
 
+  const postUrl = `${process.env.NEXT_PUBLIC_SITE_URL}/${categorySlug}/${latestPost.slug}`;
 
-  // 📩 2. Pridobi vse naročnike
+  // 2. Pridobi vse naročnike
   const { data: subscribers, error: subError } = await supabase
     .from('emails')
     .select('email, confirmation_token')
     .eq('confirmed', true)
-    .eq('unsubscribed', false)
+    .eq('unsubscribed', false);
 
   if (subError || !subscribers) {
-    return NextResponse.json({ error: 'Napaka pri branju naročnikov' }, { status: 500 })
+    return NextResponse.json(
+      { error: 'Napaka pri branju naročnikov' },
+      { status: 500 }
+    );
   }
 
-  // 📦 3. Pripravi emaile
+  // 3. Pripravi emaile
   const emails = subscribers.map(({ email, confirmation_token }) => ({
-    from: 'newsletter@tvojadomena.si',
+    from: 'newsletter@farismujezinovic.com',
     to: email,
     subject: `🆕 Nova objava: ${latestPost.title}`,
     html: `
@@ -48,10 +59,13 @@ export async function POST() {
         <a href="${process.env.NEXT_PUBLIC_SITE_URL}/unsubscribe?token=${confirmation_token}">Odjava</a>
       </p>
     `,
-  }))
+  }));
 
-  // 🚀 4. Pošlji vsem
-  await resend.batch.send(emails)
+  // 4. Pošlji vsem preko Resend
+  await resend.batch.send(emails);
 
-  return NextResponse.json({ success: true, sent: emails.length })
+  return NextResponse.json(
+    { success: true, sent: emails.length },
+    { status: 200 }
+  );
 }
