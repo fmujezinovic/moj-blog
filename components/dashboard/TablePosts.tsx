@@ -1,3 +1,4 @@
+// components/dashboard/TablePosts.tsx
 'use client'
 
 import { useEffect, useState } from 'react'
@@ -12,10 +13,11 @@ import {
 } from '@tanstack/react-table'
 import {
   AlertDialog,
+  AlertDialogTrigger,
   AlertDialogContent,
-  AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
+  AlertDialogFooter,
   AlertDialogCancel,
   AlertDialogAction,
 } from '@/components/ui/alert-dialog'
@@ -160,7 +162,11 @@ export default function TablePosts({ data }: { data: Post[] }) {
         const id = row.original.id
         return (
           <div className="flex gap-2">
-            <Button size="icon" variant="outline" onClick={() => router.push(`/dashboard/posts/${row.original.slug}/edit`)}>
+            <Button
+              size="icon"
+              variant="outline"
+              onClick={() => router.push(`/dashboard/posts/${row.original.slug}/edit`)}
+            >
               <Pencil className="h-4 w-4" />
             </Button>
             <AlertDialog>
@@ -209,6 +215,7 @@ export default function TablePosts({ data }: { data: Post[] }) {
 
   return (
     <div>
+      {/* Filters */}
       <div className="flex flex-wrap items-center justify-between gap-4 mb-4">
         <Input
           placeholder="Pretraži po naslovu"
@@ -234,6 +241,7 @@ export default function TablePosts({ data }: { data: Post[] }) {
         </Link>
       </div>
 
+      {/* Table */}
       <div className="rounded-md border overflow-x-auto">
         <table className="min-w-full text-sm">
           <thead className="bg-muted">
