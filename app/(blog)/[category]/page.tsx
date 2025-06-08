@@ -5,9 +5,15 @@ import Image from "next/image";
 
 export const dynamic = "force-dynamic";
 
-export default async function CategoryPage({ params }: { params: { category: string } }) {
+export default async function CategoryPage({
+  params,
+}: {
+  params: Promise<{ category: string }>;
+}) {
+  // Najprej await-aj params
+  const { category } = await params;
+
   const { loadContentList } = await import("@/lib/loadContent.server");
-  const { category } = params;
 
   const { data: posts } = await loadContentList({
     table: "posts",
@@ -17,7 +23,9 @@ export default async function CategoryPage({ params }: { params: { category: str
   if (!posts) {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen text-center">
-        <h1 className="font-heading text-4xl text-primary mb-4">Kategorija ni najdena</h1>
+        <h1 className="font-heading text-4xl text-primary mb-4">
+          Kategorija ni najdena
+        </h1>
         <p className="font-body text-muted-foreground">Poskusite kasneje.</p>
       </div>
     );
@@ -39,7 +47,11 @@ export default async function CategoryPage({ params }: { params: { category: str
               ? post.images
               : JSON.parse(post.images || "[]");
 
-            if (Array.isArray(imagesArray) && imagesArray.length > 0 && imagesArray[0]?.url) {
+            if (
+              Array.isArray(imagesArray) &&
+              imagesArray.length > 0 &&
+              imagesArray[0]?.url
+            ) {
               coverImage = imagesArray[0].url;
             }
           } catch {
@@ -47,7 +59,11 @@ export default async function CategoryPage({ params }: { params: { category: str
           }
 
           return (
-            <Link key={post.id} href={`/${category}/${post.slug}`} className="group">
+            <Link
+              key={post.id}
+              href={`/${category}/${post.slug}`}
+              className="group"
+            >
               <article className="flex flex-col md:flex-row bg-muted rounded-xl overflow-hidden hover:shadow-lg transition-all h-full">
                 <div className="relative w-full md:w-48 h-48 md:h-auto overflow-hidden">
                   <Image
