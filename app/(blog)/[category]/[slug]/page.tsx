@@ -12,9 +12,10 @@ interface PostListItem {
 export default async function BlogPostPage({
   params,
 }: {
-  params: { category: string; slug: string };
+  params: Promise<{ category: string; slug: string }>;
 }) {
-  const { category, slug } = params;
+  // Await params since it's a Promise in Next.js 15
+  const { category, slug } = await params;
 
   const supabase = createClient();
   const { data } = await supabase.auth.getUser();
@@ -45,7 +46,8 @@ export default async function BlogPostPage({
 
   const idx = list?.findIndex((r: PostListItem) => r.slug === slug) ?? -1;
   const prev = idx > 0 ? list![idx - 1].slug : null;
-  const next = idx >= 0 && idx < (list?.length ?? 0) - 1 ? list![idx + 1].slug : null;
+  const next =
+    idx >= 0 && idx < (list?.length ?? 0) - 1 ? list![idx + 1].slug : null;
 
   return (
     <React.Suspense fallback={<div className="py-10 text-center">Učitavam...</div>}>
@@ -63,4 +65,3 @@ export default async function BlogPostPage({
     </React.Suspense>
   );
 }
-//dd
