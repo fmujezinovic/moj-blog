@@ -58,11 +58,14 @@ export default function UploadImageButton({
         setProgress(i);
       }
 
-      const { data: urlData, error: urlErr } = supabase.storage
+      // getPublicUrl ne vrača error polja, samo data
+      const { data: urlData } = supabase.storage
         .from("images")
         .getPublicUrl(uploadData.path);
 
-      if (urlErr || !urlData.publicUrl) throw urlErr;
+      if (!urlData.publicUrl) {
+        throw new Error("Ni javnega URL-ja za sliko.");
+      }
 
       setUploadedUrl(urlData.publicUrl);
       onUploaded({ url: urlData.publicUrl, path: uploadData.path });
