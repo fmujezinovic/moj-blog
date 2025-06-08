@@ -7,49 +7,11 @@ const config: Config = {
     "./components/**/*.{ts,tsx,js,jsx,mdx}",
   ],
   theme: {
-    container: {
-      center: true,
-      padding: "2rem",
-      screens: {
-        "2xl": "1400px",
-      },
-    },
-    extend: {
-      keyframes: {
-        fadeIn: {
-          "0%": { opacity: "0" },
-          "100%": { opacity: "1" },
-        },
-      },
-      animation: {
-        fadeIn: "fadeIn 1s ease-in-out",
-      },
-      colors: {
-        background: "hsl(var(--background))",
-        foreground: "hsl(var(--foreground))",
-        primary: {
-          DEFAULT: "hsl(var(--primary))",
-          foreground: "hsl(var(--primary-foreground))",
-        },
-        heading: "hsl(var(--heading))",
-        subheading: "hsl(var(--subheading))",
-        muted: {
-          DEFAULT: "hsl(var(--muted))",
-          foreground: "hsl(var(--muted-foreground))",
-        },
-        border: "hsl(var(--border))",
-        input: "hsl(var(--input))",
-        ring: "hsl(var(--ring))",
-      },
-      fontFamily: {
-        sans: ["var(--font-sans)", ...fontFamily.sans],
-        heading: ["var(--font-heading)", ...fontFamily.sans],
-        subheading: ["var(--font-subheading)", ...fontFamily.sans],
-      },
-    },
+    /* … your existing theme setup … */
   },
   plugins: [
-    ({ addBase }) => {
+    // <-- annotate addBase so it isn't implicitly any
+    ({ addBase }: { addBase: (rules: Record<string, any>) => void }) => {
       addBase({
         "button, a": { "@apply font-sans": {} },
       });
