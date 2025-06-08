@@ -1,17 +1,16 @@
-"use client";
+'use client';
 
-import ReactMarkdown from "react-markdown";
-import remarkGfm from "remark-gfm";
+import * as React from 'react';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 
-
-import { Fragment } from "react";
-import type { ReactNode } from "react";
-import { Children, isValidElement, cloneElement } from "react";
-import { motion } from "framer-motion";
-import Image from "next/image";
-import Link from "next/link";
-import { ShareButtons } from "@/components/posts/ShareButtons";
-import NewsletterSignup from "@/components/posts/NewsletterSignup";
+import type { ReactNode } from 'react';
+import { Children, isValidElement, cloneElement } from 'react';
+import { motion } from 'framer-motion';
+import Image from 'next/image';
+import Link from 'next/link';
+import { ShareButtons } from '@/components/posts/ShareButtons';
+import NewsletterSignup from '@/components/posts/NewsletterSignup';
 
 interface FancyPostLayoutProps {
   title: string;
@@ -28,19 +27,17 @@ interface FancyPostLayoutProps {
 interface Section {
   id: string;
   label: string;
-  heading: any;
+  heading: React.ReactElement;
   body: ReactNode[];
 }
-
-
 
 const slugify = (text: string) =>
   text
     .toString()
     .toLowerCase()
     .trim()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/(^-|-$)+/g, "");
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/(^-|-$)+/g, '');
 
 export default function FancyPostLayout({
   title,
@@ -56,20 +53,25 @@ export default function FancyPostLayout({
   const elements = Children.toArray(content);
 
   const sections: Section[] = [];
-  let current: Omit<Section, "heading"> & { heading: JSX.Element | null } = {
-    id: "",
-    label: "",
+  let current: Omit<Section, 'heading'> & { heading: React.ReactElement | null } = {
+    id: '',
+    label: '',
     heading: null,
     body: [],
   };
 
   elements.forEach((el) => {
-    if (isValidElement(el) && el.type === "h2") {
+    if (isValidElement(el) && el.type === 'h2') {
       if (current.heading) {
         sections.push({ ...current, heading: current.heading });
       }
-      const text = el.props.children?.toString() || "";
-      current = { id: slugify(text), label: text, heading: el, body: [] };
+      const text = el.props.children?.toString() || '';
+      current = {
+        id: slugify(text),
+        label: text,
+        heading: el as React.ReactElement,
+        body: [],
+      };
     } else if (current.heading) {
       current.body.push(el);
     }
@@ -81,16 +83,16 @@ export default function FancyPostLayout({
 
   function enhanceLinks(body: ReactNode[]) {
     return body.map((el, i) => {
-      if (isValidElement(el) && el.type === "p") {
+      if (isValidElement(el) && el.type === 'p') {
         return cloneElement(el, {
           key: i,
           children: Children.map(el.props.children, (child) => {
-            if (isValidElement(child) && child.type === "a") {
+            if (isValidElement(child) && child.type === 'a') {
               return cloneElement(child, {
                 className:
-                  "text-primary underline decoration-1 underline-offset-2 hover:text-pink-700 transition-colors",
-                target: "_blank",
-                rel: "noopener noreferrer",
+                  'text-primary underline decoration-1 underline-offset-2 hover:text-pink-700 transition-colors',
+                target: '_blank',
+                rel: 'noopener noreferrer',
               });
             }
             return child;
@@ -100,7 +102,6 @@ export default function FancyPostLayout({
       return el;
     });
   }
-  
 
   return (
     <div className="flex flex-row-reverse bg-muted min-h-screen">
@@ -130,17 +131,17 @@ export default function FancyPostLayout({
         {/* Cover */}
         {images[0] && (
           <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.7, ease: "easeOut" }}
-          viewport={{ once: true, amount: 0.3 }}
-          className="w-full h-32 sm:h-40 md:h-48 lg:h-56 overflow-hidden rounded-xl shadow-md relative"
-        >
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.7, ease: 'easeOut' }}
+            viewport={{ once: true, amount: 0.3 }}
+            className="w-full h-32 sm:h-40 md:h-48 lg:h-56 overflow-hidden rounded-xl shadow-md relative"
+          >
             <Image
               src={images[0]}
               alt="Naslovna slika"
               fill
-              style={{ objectFit: "cover" }}
+              style={{ objectFit: 'cover' }}
               className="transition-transform duration-500 hover:scale-105"
               sizes="(max-width: 640px) 100vw, (max-width: 1024px) 80vw, 1200px"
               priority
@@ -152,126 +153,114 @@ export default function FancyPostLayout({
         <motion.h1
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.7, ease: "easeOut" }}
+          transition={{ duration: 0.7, ease: 'easeOut' }}
           viewport={{ once: true }}
-          
           className="
-          font-heading
-          text-2xl           // base (mobile)
-          sm:text-3xl        // ≥640px
-          md:text-4xl        // ≥768px
-          lg:text-5xl        // ≥1024px
-          leading-tight
-          text-center
-          text-heading
-          tracking-tight
-          max-w-3xl
-          mx-auto
-          mb-10
-        "
+            font-heading
+            text-2xl sm:text-3xl md:text-4xl lg:text-5xl
+            leading-tight
+            text-center text-heading
+            tracking-tight
+            max-w-3xl mx-auto mb-10
+          "
         >
           {title}
         </motion.h1>
 
         {/* Intro */}
         {intro && (
-  <motion.div
-  initial={{ opacity: 0, y: 30 }}
-  whileInView={{ opacity: 1, y: 0 }}
-  transition={{ duration: 0.7, ease: "easeOut" }}
-  viewport={{ once: true }}
->
-
-   <div className="prose prose-lg prose-primary max-w-none font-sans not-italic text-foreground border-l-4 border-primary mb-12 bg-blue-50 p-6 rounded-lg shadow-sm">
-
-
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.7, ease: 'easeOut' }}
+            viewport={{ once: true }}
+          >
+            <div className="prose prose-lg prose-primary max-w-none font-sans text-foreground border-l-4 border-primary mb-12 bg-blue-50 p-6 rounded-lg shadow-sm">
               <ReactMarkdown
                 remarkPlugins={[remarkGfm]}
-        components={{
-          a: ({ node, ...props }) => (
-            <a
-              {...props}
-              target="_blank"
-        rel="noopener noreferrer"
-              className="text-primary underline decoration-1 underline-offset-2 hover:text-pink-700 transition-colors"
-            />
-          ),
-        }}
-      >
-        {intro}
-      </ReactMarkdown>
-    </div>
-  </motion.div>
-)}
+                components={{
+                  a: ({ node, ...props }) => (
+                    <a
+                      {...props}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-primary underline decoration-1 underline-offset-2 hover:text-pink-700 transition-colors"
+                    />
+                  ),
+                }}
+              >
+                {intro}
+              </ReactMarkdown>
+            </div>
+          </motion.div>
+        )}
 
         {/* Sections */}
         {sections.map((section, index) => (
           <motion.section
-          key={`${section.id}-${index}`}
-          id={`${section.id}-${index}`}
-          initial={{ opacity: 0, y: 60 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, amount: 0.1 }}
-          transition={{ duration: 0.7, delay: index * 0.15, ease: "easeOut" }}
-          className="bg-white rounded-2xl shadow-md p-8 space-y-8"
+            key={`${section.id}-${index}`}
+            id={`${section.id}-${index}`}
+            initial={{ opacity: 0, y: 60 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, amount: 0.1 }}
+            transition={{ duration: 0.7, delay: index * 0.15, ease: 'easeOut' }}
+            className="bg-white rounded-2xl shadow-md p-8 space-y-8"
           >
-            {cloneElement(section.heading, {
-              className: "font-heading text-3xl sm:text-4xl text-heading mb-6",
-            })}
+            {cloneElement(
+              section.heading,
+              { className: 'font-heading text-3xl sm:text-4xl text-heading mb-6' }
+            )}
             <div className="prose prose-lg prose-primary max-w-none font-subheading text-foreground">
-            {enhanceLinks(section.body)}
+              {enhanceLinks(section.body)}
             </div>
             {images[index + 1] && (
-  <motion.div
-    initial={{ opacity: 0, y: 30 }}
-    whileInView={{ opacity: 1, y: 0 }}
-    transition={{ duration: 0.7, ease: "easeOut" }}
-    viewport={{ once: true, amount: 0.3 }}
-    className="w-full h-32 sm:h-40 md:h-48 lg:h-56 overflow-hidden rounded-xl shadow-md relative mt-8"
-  >
-    <Image
-      src={images[index + 1]}
-      alt={`Slika sekcije ${index + 1}`}
-      fill
-      style={{ objectFit: "cover" }}
-      className="transition-transform duration-500 hover:scale-105"
-      sizes="(max-width: 640px) 100vw, (max-width: 1024px) 80vw, 1200px"
-    />
-  </motion.div>
-)}
-
+              <motion.div
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.7, ease: 'easeOut' }}
+                viewport={{ once: true, amount: 0.3 }}
+                className="w-full h-32 sm:h-40 md:h-48 lg:h-56 overflow-hidden rounded-xl shadow-md relative mt-8"
+              >
+                <Image
+                  src={images[index + 1]}
+                  alt={`Slika sekcije ${index + 1}`}
+                  fill
+                  style={{ objectFit: 'cover' }}
+                  className="transition-transform duration-500 hover:scale-105"
+                  sizes="(max-width: 640px) 100vw, (max-width: 1024px) 80vw, 1200px"
+                />
+              </motion.div>
+            )}
           </motion.section>
         ))}
 
         {/* Conclusion */}
         {conclusion && (
-  <motion.div
-  initial={{ opacity: 0, y: 30 }}
-  whileInView={{ opacity: 1, y: 0 }}
-  transition={{ duration: 0.7, ease: "easeOut" }}
-  viewport={{ once: true }}
->
-    <div className="prose prose-lg prose-primary max-w-none font-sans not-italic text-foreground border-l-4 border-primary mb-12 bg-blue-50 p-6 rounded-lg shadow-sm">
-
-      <ReactMarkdown
-        remarkPlugins={[remarkGfm]}
-        components={{
-          a: ({ node, ...props }) => (
-            <a
-              {...props}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-primary underline decoration-1 underline-offset-2 hover:text-pink-700 transition-colors"
-            />
-          ),
-        }}
-      >
-        {conclusion}
-      </ReactMarkdown>
-    </div>
-  </motion.div>
-)}
-
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.7, ease: 'easeOut' }}
+            viewport={{ once: true }}
+          >
+            <div className="prose prose-lg prose-primary max-w-none font-sans text-foreground border-l-4 border-primary mb-12 bg-blue-50 p-6 rounded-lg shadow-sm">
+              <ReactMarkdown
+                remarkPlugins={[remarkGfm]}
+                components={{
+                  a: ({ node, ...props }) => (
+                    <a
+                      {...props}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-primary underline decoration-1 underline-offset-2 hover:text-pink-700 transition-colors"
+                    />
+                  ),
+                }}
+              >
+                {conclusion}
+              </ReactMarkdown>
+            </div>
+          </motion.div>
+        )}
 
         <NewsletterSignup />
 
