@@ -5,34 +5,33 @@ import { createClient } from "@/utils/supabase/server";
 
 export const dynamic = "force-dynamic";
 
-interface PostListItem {
-  slug: string;
-}
-
-interface PageProps {
+// ✨ NIČ Promise v tipu
+type PageProps = {
   params: {
     category: string;
     slug: string;
   };
+};
+
+interface PostListItem {
+  slug: string;
 }
 
 export default async function BlogPostPage({ params }: PageProps) {
   const { category, slug } = params;
 
   const supabase = createClient();
-  const { data, error } = await supabase.auth.getUser();
-const user = data?.user || null;
-const isAdmin = user?.email === "fmujezinovic@gmail.com";
-
+  const { data } = await supabase.auth.getUser();
+  const user = data?.user || null;
+  const isAdmin = user?.email === "fmujezinovic@gmail.com";
 
   const { loadContent } = await import("@/lib/loadContent.server");
 
-  // 1. Load the post content
   const result = await loadContent({
     table: "posts",
     slug,
     categorySlug: category,
-    includeDraft: isAdmin, // <--- to dodaš
+    includeDraft: isAdmin,
   });
 
   if (!result?.data) {
@@ -41,7 +40,6 @@ const isAdmin = user?.email === "fmujezinovic@gmail.com";
 
   const { data: post, MDXContent } = result;
 
-  // 2. Get prev/next navigation (le za objavljene objave)
   const { data: list } = await supabase
     .from("posts")
     .select("slug")
@@ -53,7 +51,6 @@ const isAdmin = user?.email === "fmujezinovic@gmail.com";
   const prev = idx > 0 ? list![idx - 1].slug : null;
   const next = idx >= 0 && idx < (list?.length ?? 0) - 1 ? list![idx + 1].slug : null;
 
-  // 3. Render the blog post
   return (
     <React.Suspense fallback={<div className="py-10 text-center">Učitavam...</div>}>
       <FancyPostLayout
