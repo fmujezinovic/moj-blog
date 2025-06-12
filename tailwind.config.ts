@@ -7,10 +7,29 @@ const config: Config = {
     "./components/**/*.{ts,tsx,js,jsx,mdx}",
   ],
   theme: {
-    /* … your existing theme setup … */
+    extend: {
+      colors: {
+        background: "hsl(var(--background))",
+        foreground: "hsl(var(--foreground))",
+        primary: "hsl(var(--primary))",
+        "primary-foreground": "hsl(var(--primary-foreground))",
+        heading: "hsl(var(--heading))",
+        subheading: "hsl(var(--subheading))",
+        muted: "hsl(var(--muted))",
+        "muted-foreground": "hsl(var(--muted-foreground))",
+        border: "hsl(var(--border))",
+        input: "hsl(var(--input))",
+        ring: "hsl(var(--ring))",
+        "card-border": "hsl(var(--card-border))",
+      },
+      fontFamily: {
+        sans: ["Open Sans", ...fontFamily.sans],
+        heading: ["DM Serif Display", ...fontFamily.serif],
+        subheading: ["Inter", ...fontFamily.sans],
+      },
+    },
   },
   plugins: [
-    // <-- annotate addBase so it isn't implicitly any
     ({ addBase }: { addBase: (rules: Record<string, any>) => void }) => {
       addBase({
         "button, a": { "@apply font-sans": {} },
