@@ -1,14 +1,10 @@
 /* app/globals.css */
 
-
 @import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display&display=swap');
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-
-
-
 
 /* -------------------------------------------------------- */
 /* 1. CSS varijable (prilagojene tvojemu dizajnu)            */
@@ -19,15 +15,11 @@
   --font-subheading: 'Inter', sans-serif;
 
   --background: 270 60% 98%;
-
   --foreground: 292 91% 16%;
-
   --primary: 277 66% 39%;
-
   --primary-foreground: 0 0% 100%;
 
   --heading: 290 90% 15%;
-
   --subheading: 290 90% 15%;
 
   --muted: 240 4.8% 95.9%;
@@ -52,19 +44,18 @@ body {
 /* 3. Tipografija                                           */
 /* -------------------------------------------------------- */
 @layer base {
-
   h1 {
-      @apply font-heading text-5xl md:text-6xl text-heading tracking-tight mb-6 leading-[2];
-    }
-  
-    h2 {
-      @apply font-heading text-4xl md:text-5xl text-heading tracking-normal mb-5;
-    }
-  
-    h3 {
-      @apply font-heading text-3xl md:text-4xl text-heading tracking-normal mb-4;
-    }
-  
+    @apply font-heading text-5xl md:text-6xl text-heading tracking-tight mb-6 leading-[2];
+  }
+
+  h2 {
+    @apply font-heading text-4xl md:text-5xl text-heading tracking-normal mb-5;
+  }
+
+  h3 {
+    @apply font-heading text-3xl md:text-4xl text-heading tracking-normal mb-4;
+  }
+
   p {
     @apply text-base sm:text-lg leading-relaxed mb-4;
   }
@@ -75,9 +66,9 @@ body {
   }
 
   button,
-    a {
-      @apply font-sans font-medium text-primary underline decoration-1 underline-offset-2 hover:text-primary-foreground transition-colors;
-    }
+  a {
+    @apply font-sans font-medium text-primary underline decoration-1 underline-offset-2 hover:text-primary-foreground transition-colors;
+  }
 
   .font-heading {
     font-family: var(--font-heading), sans-serif;
@@ -88,6 +79,18 @@ body {
   }
 }
 
+/* -------------------------------------------------------- */
+/* 4. Custom classes                                        */
+/* -------------------------------------------------------- */
+@layer components {
+  .text-heading {
+    @apply text-heading text-gray-900;
+  }
+}
+
+/* -------------------------------------------------------- */
+/* 5. Utility razredi                                       */
+/* -------------------------------------------------------- */
 @layer utilities {
   .prose {
     text-align: justify;
