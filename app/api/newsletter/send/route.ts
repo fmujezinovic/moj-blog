@@ -23,11 +23,10 @@ export async function POST() {
     );
   }
 
-  // Napovedujemo, da categories vedno vrne polje
-  const cats = Array.isArray(latestPost.categories)
-    ? latestPost.categories
-    : [];
-  const categorySlug = cats.length > 0 ? cats[0].slug : '';
+  const categorySlug =
+    Array.isArray(latestPost.categories) && latestPost.categories.length > 0
+      ? latestPost.categories[0].slug
+      : '';
 
   const postUrl = `${process.env.NEXT_PUBLIC_SITE_URL}/${categorySlug}/${latestPost.slug}`;
 
@@ -45,7 +44,7 @@ export async function POST() {
     );
   }
 
-  // 3. Pripravi emaile
+  // 3. Pripravi sporočila
   const emails = subscribers.map(({ email, confirmation_token }) => ({
     from: 'newsletter@farismujezinovic.com',
     to: email,
@@ -61,11 +60,10 @@ export async function POST() {
     `,
   }));
 
-  // 4. Pošlji vsem preko Resend
-  await resend.batch.send(emails);
-
-  return NextResponse.json(
-    { success: true, sent: emails.length },
-    { status: 200 }
+  // 4. Pošlji vse
+  await Promise.all(
+    emails.map((message) => resend.emails.send(message))
   );
+
+  return NextResponse.json({ success: true, sent: emails.length }, { status: 200 });
 }
