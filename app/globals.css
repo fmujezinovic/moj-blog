@@ -80,11 +80,15 @@ body {
 }
 
 /* -------------------------------------------------------- */
-/* 4. Custom classes                                        */
+/* 4. Custom Tailwind classes                               */
 /* -------------------------------------------------------- */
 @layer components {
   .text-heading {
-    @apply text-heading text-gray-900;
+    @apply text-gray-900;
+  }
+
+  .text-subheading {
+    @apply text-gray-600;
   }
 }
 
